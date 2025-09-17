@@ -1,0 +1,66 @@
+;;
+;; Domain:     workdoc360.com.
+;; Exported:   2025-08-22 15:06:01
+;;
+;; This file is intended for use for informational and archival
+;; purposes ONLY and MUST be edited before use on a production
+;; DNS server.  In particular, you must:
+;;   -- update the SOA record with the correct authoritative name server
+;;   -- update the SOA record with the contact e-mail address information
+;;   -- update the NS record(s) with the authoritative name servers for this domain.
+;;
+;; For further information, please consult the BIND documentation
+;; located on the following website:
+;;
+;; http://www.isc.org/
+;;
+;; And RFC 1035:
+;;
+;; http://www.ietf.org/rfc/rfc1035.txt
+;;
+;; Please note that we do NOT offer technical support for any use
+;; of this zone data, the BIND name server, or any other third-party
+;; DNS software.
+;;
+;; Use at your own risk.
+;; SOA Record
+workdoc360.com	3600	IN	SOA	molly.ns.cloudflare.com. dns.cloudflare.com. 2050754176 10000 2400 604800 3600
+
+;; NS Records
+workdoc360.com.	86400	IN	NS	molly.ns.cloudflare.com.
+workdoc360.com.	86400	IN	NS	wesley.ns.cloudflare.com.
+
+;; A Records
+www.workdoc360.com.	1	IN	A	34.111.179.208 ; cf_tags=cf-proxied:true
+
+;; CNAME Records
+autodiscover.workdoc360.com.	1	IN	CNAME	autodiscover.outlook.com. ; cf_tags=cf-proxied:true
+_domainconnect.workdoc360.com.	1	IN	CNAME	_domainconnect.gd.domaincontrol.com. ; cf_tags=cf-proxied:true
+email.workdoc360.com.	1	IN	CNAME	email.secureserver.net. ; cf_tags=cf-proxied:true
+lyncdiscover.workdoc360.com.	1	IN	CNAME	webdir.online.lync.com. ; cf_tags=cf-proxied:true
+msoid.workdoc360.com.	1	IN	CNAME	clientconfig.microsoftonline-p.net. ; cf_tags=cf-proxied:true
+plastermaster.workdoc360.com.	1	IN	CNAME	workdoc360.com. ; Live demo portal for Plaster Master Ltd - £65/month customer cf_tags=cf-proxied:true
+s1._domainkey.workdoc360.com.	1	IN	CNAME	s1.domainkey.u54302925.wl176.sendgrid.net. ; cf_tags=cf-proxied:true
+s2._domainkey.workdoc360.com.	1	IN	CNAME	s2.domainkey.u54302925.wl176.sendgrid.net. ; cf_tags=cf-proxied:true
+sip.workdoc360.com.	1	IN	CNAME	sipdir.online.lync.com. ; cf_tags=cf-proxied:true
+*.workdoc360.com.	1	IN	CNAME	b7ab1518-0819-4bb0-bd7f-3ba662471113-00-bxtgdzno5xmc.riker.replit.dev. ; cf_tags=cf-proxied:true
+workdoc360.com.	1	IN	CNAME	b7ab1518-0819-4bb0-bd7f-3ba662471113-00-bxtgdzno5xmc.riker.replit.dev. ; cf_tags=cf-proxied:true
+
+;; MX Records
+workdoc360.com.	1	IN	MX	0 workdoc360-com.mail.protection.outlook.com.
+
+;; NS Records
+workdoc360.com.	1	IN	NS	ns12.domaincontrol.com.
+workdoc360.com.	1	IN	NS	ns11.domaincontrol.com.
+
+;; SRV Records
+_sipfederationtls._tcp.workdoc360.com.	1	IN	SRV	100 1 5061 sipfed.online.lync.com.
+_sip._tls.workdoc360.com.	1	IN	SRV	100 1 443 sipdir.online.lync.com.
+
+;; TXT Records
+_dmarc.workdoc360.com.	1	IN	TXT	"v=DMARC1; p=reject; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;"
+workdoc360.com.	300	IN	TXT	"replit-verify=workspace-deployment"
+workdoc360.com.	1	IN	TXT	"replit-verify=9eecdaee-2fe2-4382-b98b-3618328ad7fc"
+workdoc360.com.	1	IN	TXT	"replit-verify=9eccdaee-2fe2-4382-b98b-3618328ad7fc"
+workdoc360.com.	1	IN	TXT	"v=spf1 include:secureserver.net -all"
+workdoc360.com.	1	IN	TXT	"NETORGFT19189653.onmicrosoft.com"

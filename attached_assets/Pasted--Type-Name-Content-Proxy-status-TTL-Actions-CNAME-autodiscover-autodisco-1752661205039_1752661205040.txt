@@ -1,0 +1,202 @@
+	
+Type
+
+Name
+
+Content
+
+Proxy status
+
+TTL
+
+Actions
+
+
+
+
+CNAME
+autodiscover
+autodiscover.outlook.com
+
+
+Proxied
+
+Auto
+Delete
+
+
+CNAME
+_domainconnect
+_domainconnect.gd.domaincontrol.com
+
+
+Proxied
+
+Auto
+Delete
+
+
+
+
+CNAME
+email
+email.secureserver.net
+
+
+Proxied
+
+Auto
+Delete
+
+
+
+
+CNAME
+lyncdiscover
+webdir.online.lync.com
+
+
+Proxied
+
+Auto
+Delete
+
+
+
+
+CNAME
+msoid
+clientconfig.microsoftonline-p.net
+
+
+Proxied
+
+Auto
+Delete
+
+
+CNAME
+s1._domainkey
+s1.domainkey.u54302925.wl176.sendgrid.net
+
+
+Proxied
+
+Auto
+Delete
+
+
+CNAME
+s2._domainkey
+s2.domainkey.u54302925.wl176.sendgrid.net
+
+
+Proxied
+
+Auto
+Delete
+
+
+
+
+CNAME
+sip
+sipdir.online.lync.com
+
+
+Proxied
+
+Auto
+Delete
+
+
+
+
+CNAME
+www
+cname.replit.app
+
+
+Proxied
+
+Auto
+Delete
+
+
+MX
+workdoc360.com
+workdoc360-com.mail.protection.outlook.com
+0
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+NS
+workdoc360.com
+ns12.domaincontrol.com
+DNS only
+
+Auto
+Delete
+
+
+NS
+workdoc360.com
+ns11.domaincontrol.com
+DNS only
+
+Auto
+Delete
+
+
+SRV
+_sipfederationtls._tcp
+100 1 5061 sipfed.online.lync.com
+
+100
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+
+
+SRV
+_sip._tls
+100 1 443 sipdir.online.lync.com
+
+100
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+TXT
+_dmarc
+"v=DMARC1; p=reject; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;"
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+TXT
+workdoc360.com
+"v=spf1 include:secureserver.net -all"
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+TXT
+workdoc360.com
+"NETORGFT19189653.onmicrosoft.com"
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.

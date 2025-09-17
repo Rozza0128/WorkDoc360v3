@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>External Download Test</title>
+</head>
+<body>
+    <h1>WorkDoc360 External Download Test</h1>
+    <button onclick="testDownload()">Test PDF Download</button>
+    <div id="status"></div>
+    
+    <script>
+        async function testDownload() {
+            const status = document.getElementById('status');
+            status.innerHTML = 'Starting download test...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/documents/44/download/pdf', {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const blob = await response.blob();
+                
+                // Create download
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'test-download.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                status.innerHTML = `✅ Success! Downloaded ${blob.size} bytes`;
+                
+            } catch (error) {
+                status.innerHTML = `❌ Error: ${error.message}`;
+                console.error('Download error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
