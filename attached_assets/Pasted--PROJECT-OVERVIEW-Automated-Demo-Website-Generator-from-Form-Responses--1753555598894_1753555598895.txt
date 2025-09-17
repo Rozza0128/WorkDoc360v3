@@ -1,0 +1,79 @@
+
+PROJECT OVERVIEW: Automated Demo Website Generator from Form Responses
+======================================================================
+
+OBJECTIVE:
+----------
+Allow potential clients to complete a branded website questionnaire and have the system automatically:
+1. Collect and process their responses
+2. Generate a private demo website based on their answers
+3. Share the preview via a private URL (e.g., https://youragency.co.uk/demo/abc123)
+4. Let the client approve and transition to a Phase 1 build
+
+FORM IMPLEMENTATION:
+---------------------
+- Technology: Pure HTML/CSS/JS form
+- Layout: Fully responsive and styled for clarity and modern UX
+- Key Sections:
+  â€¢ Project Details
+  â€¢ Business Information
+  â€¢ Contact Information
+  â€¢ Online Presence
+  â€¢ Website Requirements
+  â€¢ Design Preferences
+  â€¢ Content & Assets
+  â€¢ Additional Information
+- On submission:
+  â€¢ Collects form data
+  â€¢ Creates a unique ID
+  â€¢ Sends data to backend API at: https://yourdomain.co.uk/api/save-form
+  â€¢ Displays user-friendly confirmation
+
+HOSTING STRATEGY:
+-----------------
+- Avoid Replit branding entirely
+- Options include:
+  â€¢ Vercel + Custom Domain
+  â€¢ Netlify + Cloudflare DNS
+  â€¢ Cloudflare Pages (if static)
+- Domain integration: Point www.youragency.co.uk to the deployed site
+
+BACKEND OPTIONS:
+----------------
+[Preferred] Firebase + Cloud Function:
+  - Receives JSON payload
+  - Saves to Firestore
+  - Generates a static site using prebuilt templates
+  - Saves site under /demo/{uniqueId}
+
+[Alternative] Node.js + Express API on Render/Replit:
+  - Same logic, more control if using own infrastructure
+
+[No-code] Make.com + Webhook:
+  - Saves submission to Google Sheet
+  - Triggers site generation (e.g., using Placid, Pory.io, or custom HTML render via Webhook)
+
+TEMPLATE STRATEGY:
+------------------
+- Base HTML/JS templates for common layouts
+- Inject form data into template variables (e.g., {businessName}, {services}, {colours})
+- Save output to static hosting path: /demo/{uniqueId}/index.html
+
+EMAIL CONFIRMATION (OPTIONAL):
+-------------------------------
+- Send preview link via Email using:
+  â€¢ EmailJS (Client-side only)
+  â€¢ SendGrid (via backend)
+  â€¢ MailerLite or Make webhook
+
+FUTURE PHASES:
+--------------
+- Add client login to view/edit demos
+- Enable form auto-save with localStorage
+- Integrate Stripe/GoCardless for phase payment collection
+- CRM link (e.g., Pipedrive, HubSpot) via webhook or API
+
+VERSION:
+--------
+Generated on 26 July 2025 at 18:26
+System: ChatGPT-4 | Assistant output in UK English

@@ -1,0 +1,52 @@
+CLOUDFLARE DNS RECORDS FOR WORKDOC360.COM
+
+Since you're using Cloudflare nameservers, add these DNS records in Cloudflare:
+
+=== IMMEDIATE FIX FOR ROOT DOMAIN ===
+Type: A
+Name: workdoc360.com (or @)
+Content: 34.117.33.233
+TTL: Auto
+Proxy status: Proxied (orange cloud)
+
+=== CUSTOMER PORTAL SUBDOMAINS (for £65/month system) ===
+Type: A | Name: company1      | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: company2      | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: company3      | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: company4      | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: company5      | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: business1     | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: business2     | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: business3     | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: business4     | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: business5     | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: construction1 | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: construction2 | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: construction3 | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: construction4 | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: construction5 | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: scaffolding1  | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: scaffolding2  | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: scaffolding3  | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: scaffolding4  | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: scaffolding5  | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: plastering1   | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: plastering2   | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: plastering3   | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: plastering4   | Content: 34.117.33.233 | Proxy: Proxied
+Type: A | Name: plastering5   | Content: 34.117.33.233 | Proxy: Proxied
+
+HOW TO ADD IN CLOUDFLARE:
+1. Log into Cloudflare dashboard
+2. Select workdoc360.com domain
+3. Go to DNS → Records
+4. Click "Add record"
+5. Select "A" type
+6. Add each record above
+7. Keep "Proxied" enabled (orange cloud)
+
+RESULT:
+- https://workdoc360.com will work (fixes "Not Found")
+- Customer portals ready: company1.workdoc360.com, business1.workdoc360.com, etc.
+- Automated £65/month subdomain assignment system operational
+- SSL certificates handled automatically by Cloudflare

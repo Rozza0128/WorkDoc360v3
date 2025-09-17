@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-07-23T10-24-28-169Z",
+  "version": "1.0.0",
+  "project": "WorkDoc360",
+  "description": "AI-powered construction compliance management platform",
+  "backupContents": [
+    "source - Complete source code (client, server, shared)",
+    "database - Database schema and configuration",
+    "documentation - Project documentation and guides",
+    "configuration - Build and deployment configuration",
+    "assets - Uploaded files and static assets"
+  ],
+  "stats": {
+    "files": 2,
+    "directories": 5,
+    "totalSize": 2204
+  },
+  "created": "2025-07-23T10:24:28.214Z",
+  "restorationNotes": "Run npm install, configure environment variables, and run database migrations"
+}

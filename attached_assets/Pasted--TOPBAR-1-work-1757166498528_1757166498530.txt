@@ -1,0 +1,38 @@
+==========================================
+TOPBAR
+==========================================
+1. workdoc360 logo/text should be so if you click it takes you to the homepage
+2. AI powered is good but is also plastered everywhere
+3. Buttons aren't all lined up and sometimes glitch
+4. Customer login, subscribe now both take you to the same page
+
+==========================================
+MAINPAGE
+==========================================
+1. little bit laggy and scrolling isn't too smooth
+2. The "Stop spending 3.5 hours writing each risk assessment. Our AI creates HSE-compliant documents in 28 seconds💸 Save £212 in labour costs per document. ⏱ 99% faster than manual writing." should be bullet points
+3. On pc 1920x1080, the subscribe button is compressed and looks tiny and cant read.
+4. the subscribe button has a nice animation but the rest are basic
+5. the home page looks good and the other pages look underwhelming compared to, don't remove the homepage or make it worse just make everything else better
+6. The reviews page is good but maybe like a hover animation when you hover over things
+7. the "Revolutionary AI technology for construction" page  frames/cards kinda snap into the animation while all the other ones ease in.
+8. the "2.3s average ai generation time" eg section like that little bit with animated background is good and should be included maybe more over the page like not this exact one don't change it, but  more of this
+9. The "Complete UK construction industry coverage" section has a useless theme selector, don't use that at all. keep the original theme and don't let anyone change it.
+10. some of the cards on the "Complete UK construction industry coverage" are identical like they don't all look the same, and some are offset
+11. the "View all supported trades" button doesn't work, it takes you to a how-it-works page not a view all supported trades.
+12. the "Choose your ai plan" text looks a bit basic compared to the how when you first see the site, you see big effects nice text.
+13. the "📋 Contract Terms & Commitment" panel has a whole different theme from the rest of the website, and doesn't fit in.
+14. the green "Create Your Free Document - No Signup Required" needs to be removed
+15. the limited time beta pricing orange is bad as it doesn't fit in with the theme
+16. The bottom "Ready to Transform Your Construction Compliance?" and more you cant read as its white on white
+==========================================
+other pages
+==========================================
+1. The overall theme/design of the how it works page and other pages is underwhelming compared to the main page. 
+2. There are 0 animations over the whole how it works page + most others.
+3. The ui is inconsistent over many different things
+4. The topbar just completely changes like your on a whole new website. when  on different pages
+5. the wholke entire get started today auth page needs a redesign, way too basic, no way to go back and its just awful.
+6. the simple demo page also looks bad and doesn't fitr the theme.
+7. stick to one theme, the theme is all over the place throughout all the pages
+8. a lot of buttons don't work

@@ -1,0 +1,145 @@
+🔍 Conversion Funnel Diagnosis Framework
+
+🪜 Step-by-Step Funnel Breakdown
+
+Funnel Stage	Key Metric	Possible Drop-Off Causes
+
+1. Landing Page View → Click to Start Demo	CTR on hero button	Weak pain point messaging, unclear value
+2. Start Demo → Account Signup	Sign-up rate	High friction (email/pass/confirm), unclear next step
+3. Account Created → First Document Generated	Time-to-first-success	Overwhelming interface, unclear instructions, no guided flow
+4. First Document → Subscription Plan View	Plan conversion rate	Pricing fear, lack of trust, “try before buy” absent
+5. Plan View → Purchase	Purchase conversion rate	Card required too early, not enough urgency or ROI clarity
+
+
+
+---
+
+🧠 Gut Check Based on Your Description
+
+You’ve probably got the most drop-off in Steps 2–4:
+
+People love the idea, click through… but then stall once they hit:
+
+Account sign-up friction
+
+A big, blank dashboard with no hand-holding
+
+Pricing wall before perceived value is delivered
+
+
+
+
+---
+
+✅ Targeted Conversion Fixes
+
+1. Shorten Time to Magic
+
+🎯 Goal: First “wow” moment within 90 seconds
+
+Actions:
+
+Autogenerate a demo doc preview on landing page
+
+“No sign-up preview” option — watermark it to prevent abuse
+
+Use pre-filled company & trade details on demo
+
+Add this headline:
+
+> “Don’t take our word for it — here’s a scaffold RAMS document created in 27 seconds by our AI.”
+
+
+
+
+
+---
+
+2. Progressive Sign-Up
+
+Don’t ask for 5 fields and a password upfront.
+
+Instead:
+
+Ask only for company name + trade type to start demo
+
+After preview:
+
+> “Want to save, share, or generate more? Create your account to continue…”
+
+
+
+
+This reduces mental friction and gives instant gratification before commitment.
+
+
+---
+
+3. Visual Value Proof
+
+Your AI is doing brilliant work — show the receipts.
+
+Add to demo:
+
+⏱ “This document normally takes 3.5 hours… you did it in 28 seconds.”
+
+💸 “Estimated labour cost saved: £212”
+
+✅ “Meets HSE/CDM 2015 compliance requirements”
+
+
+
+---
+
+4. Pricing Optimization
+
+New Structure (to test):
+
+Tier	Price	Features
+
+Starter	£35/mo	1 user, 10 docs/mo, 1 company
+Pro	£65/mo	3 users, unlimited docs, multi-company
+Growth+	£99/mo	Priority support, mobile access, e-signing
+
+
+Offer 3-month minimum or money-back guarantee
+
+OR: First doc free, then pay to unlock downloads or editing
+
+
+
+---
+
+5. Where to Focus First (if you’re tight on time)
+
+1. ✅ Refactor demo onboarding flow – get to doc preview in 2 steps max
+
+
+2. ✅ Rework landing copy with direct pain leads and time/cost savings
+
+
+3. ✅ Run Hotjar or session recordings — watch where users rage-click or stall
+
+
+4. ✅ A/B test starter pricing tier or doc-per-month freemium plan
+
+
+
+
+---
+
+🎁 Bonus: If You Want to Go Full Throttle
+
+Add “Live Counter” to homepage:
+
+> “14,221 documents generated. £1.3M+ in saved labour costs.”
+
+
+
+Add testimonial boxes:
+
+> “I used to spend 3 hours per doc. Now it’s 3 minutes. HSE inspector passed it first time.” — James, Site Manager, Leicester
+
+
+
+Add side-by-side doc preview: Manual vs. AI
