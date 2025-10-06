@@ -1,0 +1,48 @@
+﻿name: 🚀 Build & Deploy WorkDoc360 to AWS
+
+on:
+  push:
+    branches:
+      - feature/aws-infra
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: 📂 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: 📦 Install dependencies
+        run: |
+          npm ci
+
+      - name: 🏗️ Build project
+        run: |
+          npm run build
+
+      - name: 🚀 Deploy with AWS CDK
+        uses: aws-actions/aws-cdk@v2
+        with:
+          cdk_subcommand: deploy
+          cdk_stack: ${{ secrets.CDK_STACK_NAME }}
+          require_approval: never
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+
+      - name: 🔄 Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
