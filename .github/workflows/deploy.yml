@@ -44,18 +44,12 @@ jobs:
           cd infra
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "Deploying to PROD..."
-            npx cdk deploy WorkDoc360StackProd --require-approval never
+            npx cdk deploy WD360-BaseStack --require-approval never
           else
             echo "Deploying to DEV..."
-            npx cdk deploy WorkDoc360StackDev --require-approval never
+            npx cdk deploy WD360-BaseStack --require-approval never
           fi
 
       - name: 🔄 Invalidate CloudFront cache
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "Invalidating PROD CloudFront cache..."
-            aws cloudfront create-invalidation --distribution-id E34YAN360QJVLK --paths "/*"
-          else
-            echo "Invalidating DEV CloudFront cache..."
-            aws cloudfront create-invalidation --distribution-id E34YAN360QJVLK --paths "/*"
-          fi
+          aws cloudfront create-invalidation --distribution-id E34YAN360QJVLK --paths "/*"
