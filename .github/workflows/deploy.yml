@@ -1,9 +1,10 @@
-﻿name: 🚀 Build & Deploy WorkDoc360 to AWS
+﻿name: 🚀 Build & Deploy WorkDoc360 (Dev + Prod)
 
 on:
   push:
     branches:
-      - feature/aws-infra
+      - main
+      - feature/*
 
 jobs:
   deploy:
@@ -31,18 +32,37 @@ jobs:
       - name: 🏗️ Build project
         run: npm run build
 
-      - name: 🔐 Configure AWS credentials
+      # ======================
+      # Configure AWS per environment
+      # ======================
+      - name: 🔐 Configure AWS credentials (Dev or Prod)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ github.ref == 'refs/heads/main' && secrets.AWS_ROLE_ARN_PROD || secrets.AWS_ROLE_ARN_DEV }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # ======================
+      # Deploy with AWS CDK
+      # ======================
       - name: 🚀 Deploy with AWS CDK
         run: |
           npm install -g aws-cdk
           cd infra
-          npx cdk deploy ${{ secrets.CDK_STACK_NAME }} --require-approval never
+          if [ "${GITHUB_REF##*/}" = "main" ]; then
+            echo "🚀 Deploying PRODUCTION stack..."
+            npx cdk deploy ${{ secrets.CDK_STACK_NAME_PROD }} --require-approval never
+          else
+            echo "🧪 Deploying DEVELOPMENT stack..."
+            npx cdk deploy ${{ secrets.CDK_STACK_NAME_DEV }} --require-approval never
+          fi
 
+      # ======================
+      # CloudFront cache invalidation
+      # ======================
       - name: 🔄 Invalidate CloudFront cache
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          if [ "${GITHUB_REF##*/}" = "main" ]; then
+            aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }} --paths "/*"
+          else
+            aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_DEV }} --paths "/*"
+          fi
