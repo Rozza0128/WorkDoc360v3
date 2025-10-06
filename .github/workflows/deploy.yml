@@ -32,37 +32,30 @@ jobs:
       - name: 🏗️ Build project
         run: npm run build
 
-      # ======================
-      # Configure AWS per environment
-      # ======================
-      - name: 🔐 Configure AWS credentials (Dev or Prod)
+      - name: 🔐 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ github.ref == 'refs/heads/main' && secrets.AWS_ROLE_ARN_PROD || secrets.AWS_ROLE_ARN_DEV }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2
 
-      # ======================
-      # Deploy with AWS CDK
-      # ======================
       - name: 🚀 Deploy with AWS CDK
         run: |
           npm install -g aws-cdk
           cd infra
-          if [ "${GITHUB_REF##*/}" = "main" ]; then
-            echo "🚀 Deploying PRODUCTION stack..."
-            npx cdk deploy ${{ secrets.CDK_STACK_NAME_PROD }} --require-approval never
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Deploying to PROD..."
+            npx cdk deploy WorkDoc360StackProd --require-approval never
           else
-            echo "🧪 Deploying DEVELOPMENT stack..."
-            npx cdk deploy ${{ secrets.CDK_STACK_NAME_DEV }} --require-approval never
+            echo "Deploying to DEV..."
+            npx cdk deploy WorkDoc360StackDev --require-approval never
           fi
 
-      # ======================
-      # CloudFront cache invalidation
-      # ======================
       - name: 🔄 Invalidate CloudFront cache
         run: |
-          if [ "${GITHUB_REF##*/}" = "main" ]; then
-            aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }} --paths "/*"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "Invalidating PROD CloudFront cache..."
+            aws cloudfront create-invalidation --distribution-id E34YAN360QJVLK --paths "/*"
           else
-            aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_DEV }} --paths "/*"
+            echo "Invalidating DEV CloudFront cache..."
+            aws cloudfront create-invalidation --distribution-id E34YAN360QJVLK --paths "/*"
           fi
