@@ -1,0 +1,60 @@
+﻿name: ☁️ Daily Cloudflare DNS Sync (Auto IP Updater)
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # 07:00 UTC ≈ 08:00 UK time
+  workflow_dispatch:
+
+jobs:
+  update-dns:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📂 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Install PowerShell
+        uses: PowerShell/PowerShell@v1
+        with:
+          version: '7.4.0'
+
+      - name: 🌍 Run Cloudflare Updater
+        shell: pwsh
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN $}}
+        run: |
+          \Continue = "Stop"
+
+          Write-Host "🌍 Detecting public IP..."
+          \ = (Invoke-RestMethod -Uri "https://api.ipify.org?format=json").ip
+          Write-Host "Detected IP: \"
+
+          \ = "workdoc360.com"
+          \  = "https://api.cloudflare.com/client/v4"
+          \  = @{
+            Authorization = "Bearer \"
+            "Content-Type" = "application/json"
+          }
+
+          \ = (Invoke-RestMethod -Method GET -Uri "\/zones?name=\" -Headers \).result[0]
+          \ = \.id
+          Write-Host "✅ Zone ID: \"
+
+          \ = (Invoke-RestMethod -Method GET -Uri "\/zones/\/dns_records?type=A&name=\" -Headers \).result[0]
+          if (\ -eq \) {
+            Write-Host "➕ Creating A record..."
+            \ = @{ type="A"; name=\; content=\; proxied=\True } | ConvertTo-Json
+            Invoke-RestMethod -Method POST -Uri "\/zones/\/dns_records" -Headers \ -Body \
+          } elseif (\.content -ne \) {
+            Write-Host "⚙️ Updating A record (\.content → \)..."
+            \ = @{ type="A"; name=\; content=\; proxied=\True } | ConvertTo-Json
+            Invoke-RestMethod -Method PUT -Uri "\/zones/\/dns_records/\.id" -Headers \ -Body \
+          } else {
+            Write-Host "👌 No DNS change needed — IP is current."
+          }
+
+          # Always Use HTTPS + SSL FULL
+          Invoke-RestMethod -Method PATCH -Uri "\/zones/\/settings/always_use_https" -Headers \ -Body '{"value":"on"}' | Out-Null
+          Invoke-RestMethod -Method PATCH -Uri "\/zones/\/settings/ssl" -Headers \ -Body '{"value":"full"}' | Out-Null
+
+          Write-Host "🎉 Cloudflare sync complete."
