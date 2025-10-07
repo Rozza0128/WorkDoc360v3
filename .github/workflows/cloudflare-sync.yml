@@ -1,4 +1,4 @@
-﻿name: ☁️ Daily Cloudflare DNS Sync (Auto IP Updater)
+﻿name: ☁️ Daily Cloudflare DNS Sync (Auto IP + WWW Updater)
 
 on:
   schedule:
@@ -36,24 +36,41 @@ jobs:
             "Content-Type" = "application/json"
           }
 
+          # --- Get Zone ID ---
           \ = (Invoke-RestMethod -Method GET -Uri "\/zones?name=\" -Headers \).result[0]
           \ = \.id
           Write-Host "✅ Zone ID: \"
 
+          # --- Root A Record ---
           \ = (Invoke-RestMethod -Method GET -Uri "\/zones/\/dns_records?type=A&name=\" -Headers \).result[0]
           if (\ -eq \) {
-            Write-Host "➕ Creating A record..."
+            Write-Host "➕ Creating root A record..."
             \ = @{ type="A"; name=\; content=\; proxied=\True } | ConvertTo-Json
             Invoke-RestMethod -Method POST -Uri "\/zones/\/dns_records" -Headers \ -Body \
           } elseif (\.content -ne \) {
-            Write-Host "⚙️ Updating A record (\.content → \)..."
+            Write-Host "⚙️ Updating root A record (\.content → \)..."
             \ = @{ type="A"; name=\; content=\; proxied=\True } | ConvertTo-Json
             Invoke-RestMethod -Method PUT -Uri "\/zones/\/dns_records/\.id" -Headers \ -Body \
           } else {
-            Write-Host "👌 No DNS change needed — IP is current."
+            Write-Host "👌 Root A record already correct."
           }
 
-          # Always Use HTTPS + SSL FULL
+          # --- WWW CNAME Record ---
+          \ = "www.\"
+          \ = (Invoke-RestMethod -Method GET -Uri "\/zones/\/dns_records?name=\" -Headers \).result[0]
+          if (\ -eq \) {
+            Write-Host "➕ Creating CNAME for www → \..."
+            \ = @{ type="CNAME"; name="www"; content=\; proxied=\True } | ConvertTo-Json
+            Invoke-RestMethod -Method POST -Uri "\/zones/\/dns_records" -Headers \ -Body \
+          } elseif (\.content -ne \) {
+            Write-Host "⚙️ Updating CNAME www → \..."
+            \ = @{ type="CNAME"; name="www"; content=\; proxied=\True } | ConvertTo-Json
+            Invoke-RestMethod -Method PUT -Uri "\/zones/\/dns_records/\.id" -Headers \ -Body \
+          } else {
+            Write-Host "👌 CNAME www already correct."
+          }
+
+          # --- Always Use HTTPS + SSL FULL ---
           Invoke-RestMethod -Method PATCH -Uri "\/zones/\/settings/always_use_https" -Headers \ -Body '{"value":"on"}' | Out-Null
           Invoke-RestMethod -Method PATCH -Uri "\/zones/\/settings/ssl" -Headers \ -Body '{"value":"full"}' | Out-Null
 
