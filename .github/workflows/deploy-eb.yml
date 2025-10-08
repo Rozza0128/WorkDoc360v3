@@ -27,7 +27,8 @@ jobs:
       - name: ⚙️ Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22.x'
+    cache: 'npm'
 
       - name: 📦 Install dependencies
         run: npm ci
@@ -70,3 +71,4 @@ jobs:
           aws elasticbeanstalk describe-environments --region "${{ env.AWS_REGION }}" \
             --query "Environments[?EnvironmentName=='${{ env.EB_ENV_NAME }}'].[EnvironmentName,VersionLabel,Status,Health,CNAME]" \
             --output table
+
