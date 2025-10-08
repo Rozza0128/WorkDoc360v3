@@ -32,34 +32,8 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🧹 Clean vite.config.ts
-        run: |
-          if [ -f "vite.config.ts" ]; then
-            sed -i '/@replit\/vite-plugin-cartographer/d' vite.config.ts || true
-            sed -i '/@replit\/vite-plugin-runtime-error-modal/d' vite.config.ts || true
-            sed -i -E '/^[[:space:]]*\)[[:space:]]*,?[[:space:]]*$/d' vite.config.ts || true
-          fi
-
-      - name: 🧾 Ensure Procfile exists
-        run: echo "web: npm start" > Procfile
-
-      - name: 🧩 Ensure package.json start script
-        run: |
-          node -e "
-            const fs=require('fs');
-            const p=JSON.parse(fs.readFileSync('package.json','utf8'));
-            const desired='NODE_ENV=production node dist/server/index.js';
-            p.scripts=p.scripts||{};
-            if(p.scripts.start!==desired){p.scripts.start=desired;fs.writeFileSync('package.json',JSON.stringify(p,null,2));}
-          "
-
       - name: 🏗️ Build project
         run: npm run build
-
-      - name: 📂 Create deployment package
-        run: |
-          zip -r app.zip package.json package-lock.json Procfile .ebextensions dist server
-          ls -lh app.zip
 
       - name: 🔐 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -70,18 +44,19 @@ jobs:
       - name: ☁️ Upload to S3
         run: |
           KEY="app-${{ github.run_id }}.zip"
-          aws s3 cp app.zip "s3://${{ env.EB_S3_BUCKET }}/${KEY}"
-          echo "S3_KEY=${KEY}" >> $GITHUB_ENV
+          zip -r $KEY package.json package-lock.json Procfile .ebextensions dist server
+          aws s3 cp $KEY "s3://${{ env.EB_S3_BUCKET }}/$KEY"
+          echo "S3_KEY=$KEY" >> $GITHUB_ENV
 
       - name: 🚀 Create EB application version
         run: |
           LABEL="v${{ github.run_id }}"
           aws elasticbeanstalk create-application-version \
             --application-name "${{ env.EB_APP_NAME }}" \
-            --version-label "${LABEL}" \
-            --source-bundle S3Bucket="${{ env.EB_S3_BUCKET }}",S3Key="${S3_KEY}" \
+            --version-label "$LABEL" \
+            --source-bundle S3Bucket="${{ env.EB_S3_BUCKET }}",S3Key="$S3_KEY" \
             --region "${{ env.AWS_REGION }}"
-          echo "EB_VERSION_LABEL=${LABEL}" >> $GITHUB_ENV
+          echo "EB_VERSION_LABEL=$LABEL" >> $GITHUB_ENV
 
       - name: 🌍 Deploy to EB environment
         run: |
