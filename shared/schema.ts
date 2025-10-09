@@ -43,10 +43,10 @@ export const users = pgTable("users", {
   twoFactorMethod: varchar("two_factor_method", { length: 20 }).default("email"), // email, sms, totp
   twoFactorSecret: varchar("two_factor_secret"), // For TOTP authenticator apps
   backupCodes: text("backup_codes").array(), // Emergency backup codes
-  
+
   // User Role System - for WorkDoc360 admin functions
   role: varchar("role", { length: 50 }).default("user"), // user, admin, superadmin
-  
+
   selectedPlan: varchar("selected_plan", { length: 50 }), // micro, essential, professional, enterprise - null until selected
   planStatus: varchar("plan_status", { length: 50 }).default("free_trial"), // free_trial, no_plan, pending_payment, active, cancelled, expired
   freeDocumentsUsed: integer("free_documents_used").default(0), // Track free document usage
@@ -78,10 +78,10 @@ export const cscsPersonnelRecords = pgTable("cscs_personnel_records", {
   employeeName: varchar("employee_name", { length: 100 }).notNull(),
   employeeId: varchar("employee_id", { length: 50 }), // Company's internal employee ID
   nationalInsuranceNumber: varchar("ni_number", { length: 15 }), // For payroll/tax records
-  
+
   // Contact Information
   phoneNumber: varchar("phone_number", { length: 20 }), // Mobile number for SMS notifications
-  
+
   // Employment Type Classification
   employmentType: varchar("employment_type", { length: 30 }).notNull(), // permanent, temporary, subcontractor, agency, freelance
   contractorCompany: varchar("contractor_company", { length: 100 }), // If subcontractor/agency
@@ -89,12 +89,12 @@ export const cscsPersonnelRecords = pgTable("cscs_personnel_records", {
   contractStartDate: date("contract_start_date"),
   contractEndDate: date("contract_end_date"), // null for permanent
   dayRate: integer("day_rate"), // Daily rate in pence
-  
+
   // Role and Trade Information
   primaryTrade: varchar("primary_trade", { length: 100 }).notNull(), // Scaffolder, Electrician, etc.
   role: varchar("role", { length: 100 }).notNull(), // Site Supervisor, Labourer, etc.
   skillLevel: varchar("skill_level", { length: 20 }).notNull(), // apprentice, skilled, supervisor, manager
-  
+
   // CSCS Card Details
   cscsCardNumber: varchar("cscs_card_number", { length: 20 }).notNull(),
   cardType: varchar("card_type", { length: 100 }).notNull(), // Green CSCS Labourer Card, etc.
@@ -103,23 +103,23 @@ export const cscsPersonnelRecords = pgTable("cscs_personnel_records", {
   expiryDate: date("expiry_date").notNull(),
   verificationDate: timestamp("verification_date").notNull(),
   verificationStatus: varchar("verification_status", { length: 20 }).notNull(), // valid, expired, revoked, pending
-  
+
   // Current Assignment
   currentSite: varchar("current_site", { length: 200 }), // Which site they're currently working on
   currentProject: varchar("current_project", { length: 200 }), // Project name/code
   siteStartDate: date("site_start_date"), // When they started on current site
   expectedEndDate: date("expected_end_date"), // When assignment ends
-  
+
   // Insurance and Compliance
   insuranceProvider: varchar("insurance_provider", { length: 100 }),
   publicLiabilityAmount: integer("public_liability_amount"), // Coverage amount
   emergencyContact: varchar("emergency_contact", { length: 200 }),
-  
+
   // Photo and Documentation
   photoUrl: varchar("photo_url", { length: 500 }), // URL to cardholder photo if extracted
   inductionCompleted: boolean("induction_completed").default(false),
   inductionDate: date("induction_date"),
-  
+
   // Record Management
   recordStatus: varchar("record_status", { length: 20 }).default("active"), // active, suspended, archived
   notes: text("notes"), // Additional compliance notes
@@ -186,63 +186,63 @@ export const voucherUsage = pgTable("voucher_usage", {
 export const demoQuestionnaires = pgTable("demo_questionnaires", {
   id: serial("id").primaryKey(),
   uniqueId: varchar("unique_id", { length: 50 }).unique().notNull().$defaultFn(() => `demo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
-  
+
   // Project Details
   projectType: varchar("project_type", { length: 100 }).notNull(), // new_website, redesign, update
   businessName: varchar("business_name", { length: 255 }).notNull(),
   tradeType: varchar("trade_type", { length: 100 }).notNull(),
   businessType: varchar("business_type", { length: 100 }).notNull(), // sole_trader, limited_company, partnership
-  
+
   // Contact Information
   contactName: varchar("contact_name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull(),
   phone: varchar("phone", { length: 50 }),
   address: text("address"),
   postcode: varchar("postcode", { length: 10 }),
-  
+
   // Business Information
   businessDescription: text("business_description"),
   yearsInBusiness: integer("years_in_business"),
   numberOfEmployees: varchar("number_of_employees", { length: 50 }),
   serviceAreas: text("service_areas").array(), // Areas they serve
   mainServices: text("main_services").array(), // Key services offered
-  
+
   // Online Presence
   currentWebsite: varchar("current_website", { length: 500 }),
   socialMedia: jsonb("social_media"), // {facebook: url, linkedin: url, etc}
-  
+
   // Website Requirements
   primaryGoals: text("primary_goals").array(), // generate_leads, showcase_work, build_trust
   targetAudience: text("target_audience").array(), // homeowners, commercial, councils
   keyFeatures: text("key_features").array(), // online_quotes, project_gallery, testimonials
-  
+
   // Design Preferences
   preferredColors: text("preferred_colors").array(),
   designStyle: varchar("design_style", { length: 100 }), // modern, traditional, professional
   competitorWebsites: text("competitor_websites").array(),
-  
+
   // Content & Assets
   hasLogo: boolean("has_logo").default(false),
   hasPhotos: boolean("has_photos").default(false),
   hasTestimonials: boolean("has_testimonials").default(false),
   contentReady: boolean("content_ready").default(false),
-  
+
   // Additional Information
   budget: varchar("budget", { length: 50 }),
   timeline: varchar("timeline", { length: 50 }),
   additionalRequirements: text("additional_requirements"),
   marketingChallenges: text("marketing_challenges").array(),
-  
+
   // Demo Generation Status
   demoGenerated: boolean("demo_generated").default(false),
   demoUrl: varchar("demo_url", { length: 500 }),
   approved: boolean("approved").default(false),
   approvedAt: timestamp("approved_at"),
-  
+
   // Follow-up
   followUpSent: boolean("follow_up_sent").default(false),
   convertedToCustomer: boolean("converted_to_customer").default(false),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -252,37 +252,37 @@ export const demoWebsites = pgTable("demo_websites", {
   id: serial("id").primaryKey(),
   questionnaireId: integer("questionnaire_id").notNull().references(() => demoQuestionnaires.id),
   uniqueId: varchar("unique_id", { length: 50 }).unique().notNull(),
-  
+
   // Generated Content
   websiteHtml: text("website_html").notNull(),
   websiteCss: text("website_css").notNull(),
   websiteJs: text("website_js"),
-  
+
   // Branding Elements
   primaryColor: varchar("primary_color", { length: 20 }).default("#f97316"), // construction orange
   secondaryColor: varchar("secondary_color", { length: 20 }).default("#1f2937"), // dark grey
   fontFamily: varchar("font_family", { length: 100 }).default("Inter"),
-  
+
   // Content Sections
   heroSection: jsonb("hero_section"),
   aboutSection: jsonb("about_section"),
   servicesSection: jsonb("services_section"),
   testimonialsSection: jsonb("testimonials_section"),
   contactSection: jsonb("contact_section"),
-  
+
   // Site Metadata
   title: varchar("title", { length: 255 }),
   description: text("description"),
   keywords: text("keywords").array(),
-  
+
   // Analytics
   viewCount: integer("view_count").default(0),
   lastViewed: timestamp("last_viewed"),
-  
+
   // Approval Status
   status: varchar("status", { length: 50 }).default("generated"), // generated, approved, rejected
   feedback: text("feedback"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -298,23 +298,31 @@ export const companies = pgTable("companies", {
   phone: varchar("phone", { length: 20 }),
   logoUrl: varchar("logo_url"),
   companySlug: varchar("company_slug", { length: 100 }).unique(), // For subdomain routing: plastermaster.workdoc360.co.uk
-  brandingColors: json("branding_colors").$type<{primary?: string; secondary?: string; accent?: string}>(), // Company theme colors
+  brandingColors: json("branding_colors").$type<{ primary?: string; secondary?: string; accent?: string }>(), // Company theme colors
   ownerId: varchar("owner_id").notNull().references(() => users.id),
-  
+
   // Master Company System - Template providers for trade standards
   isMasterCompany: boolean("is_master_company").default(false), // This company provides templates for its trade
   masterCompanyDescription: text("master_company_description"), // What standards/templates this master company provides
   certificationBodies: text("certification_bodies").array(), // ["NASC", "CISRS", "FENSA", "ISO 9001"] - bodies they monitor
   lastStandardsUpdate: timestamp("last_standards_update"), // When they last updated their templates
   masterCompanyContact: varchar("master_company_contact", { length: 255 }), // Contact for template updates
-  
+
   // Archiving System - Soft Delete for Customer Protection
   isArchived: boolean("is_archived").default(false), // Soft delete - customer can reactivate
   archivedAt: timestamp("archived_at"), // When was it archived
   archivedBy: varchar("archived_by").references(() => users.id), // Who archived it (admin/superadmin)
   archiveReason: text("archive_reason"), // Why was it archived
   deletedByWorkdoc360: boolean("deleted_by_workdoc360").default(false), // Only superadmin can permanently delete
-  
+
+  // Billing / subscription metadata (Stripe)
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+  subscriptionStatus: varchar("subscription_status", { length: 50 }), // active, past_due, canceled
+  currentPeriodEnd: timestamp("current_period_end"),
+  lastPaidAt: timestamp("last_paid_at"),
+  stripeSessionId: varchar("stripe_session_id", { length: 255 }), // Last known Checkout session id
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -432,7 +440,7 @@ export const generatedDocuments = pgTable("generated_documents", {
   isTemplate: boolean("is_template").default(false), // if this is a master template copy
   filePath: varchar("file_path", { length: 500 }),
   fileUrl: varchar("file_url", { length: 500 }),
-  
+
   // Master Template Source Tracking - NEW FIELDS
   sourceType: varchar("source_type", { length: 50 }).default("ai_custom"), // ai_custom, master_template, user_template  
   masterTemplateId: integer("master_template_id"), // Will reference masterCompanyTemplates.id when that table is created
@@ -458,12 +466,12 @@ export const masterCompanyTemplates = pgTable("master_company_templates", {
   templateName: varchar("template_name", { length: 200 }).notNull(),
   documentType: varchar("document_type", { length: 100 }).notNull(), // risk_assessment, method_statement, etc.
   tradeSpecific: varchar("trade_specific", { length: 100 }).notNull(), // scaffolding, plastering, electrical, etc.
-  
+
   // Template Content
   templateContent: text("template_content").notNull(), // The actual template content
   templateVariables: jsonb("template_variables"), // Variables that companies can customize
   complianceStandards: text("compliance_standards").array(), // ["BS EN 12811", "NASC SG4:10", "HSE ACOP"]
-  
+
   // Template Metadata
   version: varchar("version", { length: 20 }).notNull().default("1.0"),
   isActive: boolean("is_active").default(true),
@@ -471,11 +479,11 @@ export const masterCompanyTemplates = pgTable("master_company_templates", {
   usageInstructions: text("usage_instructions"), // How to use this template
   lastReviewDate: timestamp("last_review_date").defaultNow(),
   nextReviewDate: timestamp("next_review_date"),
-  
+
   // Template Access Control
   accessLevel: varchar("access_level", { length: 50 }).default("public"), // public, premium, restricted
   requiresApproval: boolean("requires_approval").default(false), // Some templates need master company approval
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -485,16 +493,16 @@ export const companyMasterSubscriptions = pgTable("company_master_subscriptions"
   id: serial("id").primaryKey(),
   companyId: integer("company_id").notNull().references(() => companies.id), // Individual company
   masterCompanyId: integer("master_company_id").notNull().references(() => companies.id), // Master template provider
-  
+
   // Subscription Details
   subscriptionType: varchar("subscription_type", { length: 50 }).default("standard"), // standard, premium, custom
   isActive: boolean("is_active").default(true),
   autoUpdateTemplates: boolean("auto_update_templates").default(true), // Auto-receive template updates
-  
+
   // Usage Tracking
   templatesUsed: integer("templates_used").default(0), // How many templates used from this master
   lastTemplateUsed: timestamp("last_template_used"),
-  
+
   subscribedAt: timestamp("subscribed_at").defaultNow(),
   lastUpdated: timestamp("last_updated").defaultNow(),
 }, (table) => ({
@@ -510,16 +518,16 @@ export const masterCompanyUpdates = pgTable("master_company_updates", {
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description").notNull(),
   affectedTemplateIds: integer("affected_template_ids").array(), // Which templates were affected
-  
+
   // Standards Information
   standardsBody: varchar("standards_body", { length: 100 }), // "ISO", "HSE", "NASC", etc.
   standardReference: varchar("standard_reference", { length: 50 }), // "ISO 9001:2015", "NASC SG4:10"
   changeType: varchar("change_type", { length: 50 }), // minor_update, major_revision, new_requirement
-  
+
   // Notification Status
   notificationsSent: boolean("notifications_sent").default(false),
   subscribersNotified: integer("subscribers_notified").default(0),
-  
+
   publishedAt: timestamp("published_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -932,27 +940,27 @@ export const masterTradeCompanies = pgTable("master_trade_companies", {
   tradeType: varchar("trade_type", { length: 50 }).notNull(), // scaffolding, plastering, roofing, etc.
   name: varchar("name", { length: 200 }).notNull(),
   description: text("description"),
-  
+
   // Update settings
   updateFrequency: varchar("update_frequency", { length: 20 }).default("monthly"), // daily, weekly, monthly
   lastUpdateCheck: timestamp("last_update_check").defaultNow(),
   nextUpdateCheck: timestamp("next_update_check").defaultNow(),
-  
+
   // Industry credentials
   certifyingBodies: text("certifying_bodies").array(), // ["NASC", "CITB", "HSE"]
   industryStandards: text("industry_standards").array(), // ["BS EN 12811", "TG20:13"]
-  
+
   // Business model
   subscriptionTier: varchar("subscription_tier", { length: 20 }).default("basic"), // basic, premium, enterprise
   basicMonthlyFee: integer("basic_monthly_fee").default(4500), // In pence (£45.00)
   premiumMonthlyFee: integer("premium_monthly_fee").default(8500), // In pence (£85.00)
   enterpriseMonthlyFee: integer("enterprise_monthly_fee").default(15000), // In pence (£150.00)
-  
+
   // Status and metadata
   status: varchar("status", { length: 20 }).default("active"), // active, suspended, archived
   totalMemberCompanies: integer("total_member_companies").default(0),
   totalDocuments: integer("total_documents").default(0),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -960,33 +968,33 @@ export const masterTradeCompanies = pgTable("master_trade_companies", {
 export const masterDocuments = pgTable("master_documents", {
   id: varchar("id").primaryKey().notNull().$defaultFn(() => `masterdoc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
   masterTradeId: varchar("master_trade_id").notNull().references(() => masterTradeCompanies.id),
-  
+
   // Document classification
   documentType: varchar("document_type", { length: 50 }).notNull(), // method_statement, risk_assessment, toolbox_talk, etc.
   title: varchar("title", { length: 300 }).notNull(),
   description: text("description"),
   content: text("content").notNull(),
   version: varchar("version", { length: 20 }).default("v1.0"),
-  
+
   // Compliance tracking
   regulatoryBodies: text("regulatory_bodies").array(), // ["HSE", "CDM", "CITB"]
   complianceStandards: text("compliance_standards").array(), // ["BS EN 12811", "TG20:13"]
   lastReviewDate: date("last_review_date"),
   nextReviewDate: date("next_review_date"),
-  
+
   // Distribution tracking
   distributedToCompanies: text("distributed_to_companies").array(), // Company IDs
   acknowledgmentRequired: boolean("acknowledgment_required").default(true),
   acknowledgedByCompanies: text("acknowledged_by_companies").array(),
-  
+
   // Change management
   urgencyLevel: varchar("urgency_level", { length: 20 }).default("medium"), // low, medium, high, critical
   changeReason: text("change_reason"),
   previousVersion: varchar("previous_version", { length: 20 }),
-  
+
   // Status
   status: varchar("status", { length: 20 }).default("active"), // active, archived, deprecated
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -995,30 +1003,30 @@ export const companySubscriptions = pgTable("company_subscriptions", {
   id: varchar("id").primaryKey().notNull().$defaultFn(() => `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
   companyId: integer("company_id").notNull().references(() => companies.id),
   masterTradeId: varchar("master_trade_id").notNull().references(() => masterTradeCompanies.id),
-  
+
   // Subscription details
   subscriptionTier: varchar("subscription_tier", { length: 20 }).notNull(), // basic, premium, enterprise
   monthlyFee: integer("monthly_fee").notNull(), // In pence
   startDate: date("start_date").notNull(),
   renewalDate: date("renewal_date").notNull(),
   status: varchar("status", { length: 20 }).default("active"), // active, suspended, cancelled
-  
+
   // Notification preferences
   emailNotifications: boolean("email_notifications").default(true),
   smsNotifications: boolean("sms_notifications").default(false),
   inAppNotifications: boolean("in_app_notifications").default(true),
   urgentUpdatesOnly: boolean("urgent_updates_only").default(false),
-  
+
   // Compliance tracking
   lastSyncDate: timestamp("last_sync_date").defaultNow(),
   pendingDocuments: text("pending_documents").array(), // Document IDs awaiting acknowledgment
   overrideDocuments: text("override_documents").array(), // Company has customised versions
-  
+
   // Payment tracking
   lastPaymentDate: date("last_payment_date"),
   nextPaymentDate: date("next_payment_date"),
   paymentMethod: varchar("payment_method", { length: 50 }),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1026,30 +1034,30 @@ export const companySubscriptions = pgTable("company_subscriptions", {
 export const updateRecommendations = pgTable("update_recommendations", {
   id: varchar("id").primaryKey().notNull().$defaultFn(() => `update_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
   masterTradeId: varchar("master_trade_id").notNull().references(() => masterTradeCompanies.id),
-  
+
   // Recommendation details
   title: varchar("title", { length: 300 }).notNull(),
   description: text("description").notNull(),
   recommendationType: varchar("recommendation_type", { length: 50 }).notNull(), // document_update, new_requirement, safety_alert
-  
+
   // Associated documents
   affectedDocuments: text("affected_documents").array(), // Document IDs
   newDocuments: text("new_documents").array(), // New document IDs
-  
+
   // Implementation details
   implementationDeadline: date("implementation_deadline"),
   priority: varchar("priority", { length: 20 }).default("medium"), // low, medium, high, critical
   estimatedImplementationTime: integer("estimated_implementation_time"), // hours
-  
+
   // Tracking
   targetCompanyIds: text("target_company_ids").array(),
   sentToCompanies: text("sent_to_companies").array(),
   implementedByCompanies: text("implemented_by_companies").array(),
   rejectionReasons: jsonb("rejection_reasons"), // {companyId: reason}
-  
+
   // Status
   status: varchar("status", { length: 20 }).default("pending"), // pending, sent, completed, expired
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   expiresAt: timestamp("expires_at"),
 });
@@ -1057,29 +1065,29 @@ export const updateRecommendations = pgTable("update_recommendations", {
 export const industryExperts = pgTable("industry_experts", {
   id: varchar("id").primaryKey().notNull().$defaultFn(() => `expert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`),
   masterTradeId: varchar("master_trade_id").notNull().references(() => masterTradeCompanies.id),
-  
+
   // Expert details
   name: varchar("name", { length: 200 }).notNull(),
   email: varchar("email", { length: 200 }).unique().notNull(),
   phone: varchar("phone", { length: 30 }),
-  
+
   // Expertise
   expertise: text("expertise").array(), // ["scaffolding_safety", "height_regulations"]
   qualifications: text("qualifications").array(),
   yearsExperience: integer("years_experience"),
   role: varchar("role", { length: 50 }).notNull(), // lead_expert, specialist, reviewer
-  
+
   // Professional details
   companyAffiliation: varchar("company_affiliation", { length: 200 }),
   professionalBodies: text("professional_bodies").array(), // ["CITB", "NASC"]
   certificationNumbers: text("certification_numbers").array(),
-  
+
   // Activity tracking
   documentsReviewed: integer("documents_reviewed").default(0),
   lastActivity: timestamp("last_activity"),
-  
+
   status: varchar("status", { length: 20 }).default("active"), // active, inactive, archived
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

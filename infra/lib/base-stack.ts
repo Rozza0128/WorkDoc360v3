@@ -11,6 +11,10 @@ import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 export interface BaseStackProps extends cdk.StackProps {
   domainName?: string;   // e.g. workdoc360.com
   subdomain?: string;    // e.g. app (will become app.workdoc360.com)
+  // If you already have an ACM certificate (in us-east-1 for CloudFront),
+  // provide its ARN here and optionally the domain names it covers.
+  certificateArn?: string;
+  domainNames?: string[];
 }
 
 export class BaseStack extends cdk.Stack {
@@ -30,12 +34,16 @@ export class BaseStack extends cdk.Stack {
     siteBucket.grantRead(oai);
 
     // 3️⃣ Optional Route53 + ACM Certificate
-    let certificateArn: string | undefined = undefined;
-    let domainNames: string[] | undefined = undefined;
+    // Allow passing an existing certificate ARN + domainNames via props.
+    let certificateArn: string | undefined = props.certificateArn;
+    let domainNames: string[] | undefined = props.domainNames;
     let zone: route53.IHostedZone | undefined;
     const { domainName, subdomain = 'app' } = props;
 
-    if (domainName) {
+    // If no certificateArn was supplied, try to obtain one via Route53 lookup
+    // and DNS-validated ACM certificate. If Route53 isn't available, the
+    // stack will continue and leave CloudFront with the default domain.
+    if (!certificateArn && domainName) {
       try {
         zone = route53.HostedZone.fromLookup(this, 'HostedZone', { domainName });
         const fullDomain = `${subdomain}.${domainName}`;
@@ -69,12 +77,8 @@ export class BaseStack extends cdk.Stack {
       ...(domainNames ? { domainNames } : {}),
       ...(certificateArn
         ? {
-            certificate: acm.Certificate.fromCertificateArn(
-              this,
-              'ImportedCert',
-              certificateArn
-            ),
-          }
+          certificate: acm.Certificate.fromCertificateArn(this, 'ImportedCert', certificateArn),
+        }
         : {}),
     });
 

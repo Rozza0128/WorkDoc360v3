@@ -53,10 +53,18 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql, count, gte, lte } from "drizzle-orm";
-import { 
+import {
   masterCompanyTemplates,
   companyMasterSubscriptions,
   masterCompanyUpdates,
+} from "@shared/schema";
+import type {
+  MasterCompanyTemplate,
+  InsertMasterCompanyTemplate,
+  CompanyMasterSubscription,
+  InsertCompanyMasterSubscription,
+  MasterCompanyUpdate,
+  InsertMasterCompanyUpdate,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -64,10 +72,11 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: Partial<InsertUser>): Promise<User>;
   updateUser(id: string, updates: Partial<InsertUser>): Promise<User>;
   updateUserPhone(id: string, phoneNumber: string): Promise<User>;
   updateUserPlan(userId: string, selectedPlan: string, subscriptionType: string): Promise<User>;
-  
+
   // Two-factor authentication operations
   createTwoFactorCode(code: InsertTwoFactorCode): Promise<TwoFactorCode>;
   verifyTwoFactorCode(userId: string, code: string, type: string): Promise<boolean>;
@@ -75,7 +84,7 @@ export interface IStorage {
   enableTwoFactor(userId: string, secret: string, backupCodes: string[]): Promise<void>;
   disableTwoFactor(userId: string): Promise<void>;
   updateBackupCodes(userId: string, codes: string[]): Promise<void>;
-  
+
   // Company operations
   createCompany(company: InsertCompany): Promise<Company>;
   getCompany(id: number): Promise<Company | undefined>;
@@ -86,7 +95,7 @@ export interface IStorage {
   getUserCompanies(userId: string): Promise<Company[]>;
   updateCompany(id: number, company: Partial<InsertCompany>): Promise<Company>;
   updateCompanySubdomain(id: number, subdomain: string): Promise<Company>;
-  
+
   // Company archiving operations (soft delete protection)
   archiveCompany(companyId: number, archivedBy: string, reason?: string): Promise<Company>;
   restoreCompany(companyId: number): Promise<Company>;
@@ -98,72 +107,72 @@ export interface IStorage {
   getMasterCompanyTemplates(masterCompanyId: number): Promise<MasterCompanyTemplate[]>;
   getTemplatesByTrade(tradeType: string): Promise<MasterCompanyTemplate[]>;
   getMasterCompaniesForTrade(tradeType: string): Promise<Company[]>;
-  
+
   // Company subscriptions to master companies
   subscribeToMasterCompany(subscription: InsertCompanyMasterSubscription): Promise<CompanyMasterSubscription>;
   getCompanySubscriptions(companyId: number): Promise<CompanyMasterSubscription[]>;
   getMasterCompanySubscribers(masterCompanyId: number): Promise<CompanyMasterSubscription[]>;
   updateTemplateUsage(subscriptionId: number): Promise<void>;
-  
+
   // Master company updates and notifications
   createMasterCompanyUpdate(update: InsertMasterCompanyUpdate): Promise<MasterCompanyUpdate>;
   getMasterCompanyUpdates(masterCompanyId: number): Promise<MasterCompanyUpdate[]>;
   getUpdatesForCompany(companyId: number): Promise<MasterCompanyUpdate[]>;
-  
+
   // Company user operations
   addUserToCompany(companyUser: InsertCompanyUser): Promise<CompanyUser>;
   getCompanyUsers(companyId: number): Promise<(CompanyUser & { user: User })[]>;
   getUserRole(userId: string, companyId: number): Promise<string | undefined>;
-  
+
   // CSCS card operations
   createCSCSCard(card: InsertCSCSCard): Promise<CSCSCard>;
   getCSCSCards(companyId: number): Promise<CSCSCard[]>;
   getExpiringCSCSCards(companyId: number, days: number): Promise<CSCSCard[]>;
-  
+
   // Risk assessment operations
   createRiskAssessment(assessment: InsertRiskAssessment): Promise<RiskAssessment>;
   getRiskAssessments(companyId: number): Promise<RiskAssessment[]>;
   updateRiskAssessment(id: number, assessment: Partial<InsertRiskAssessment>): Promise<RiskAssessment>;
-  
+
   // Method statement operations
   createMethodStatement(statement: InsertMethodStatement): Promise<MethodStatement>;
   getMethodStatements(companyId: number): Promise<MethodStatement[]>;
-  
+
   // Toolbox talk operations
   createToolboxTalk(talk: InsertToolboxTalk): Promise<ToolboxTalk>;
   getToolboxTalks(companyId: number): Promise<ToolboxTalk[]>;
   getToolboxTalksThisMonth(companyId: number): Promise<number>;
-  
+
   // Compliance operations
   createComplianceItem(item: InsertComplianceItem): Promise<ComplianceItem>;
   getComplianceItems(companyId: number): Promise<ComplianceItem[]>;
   getOverdueComplianceItems(companyId: number): Promise<ComplianceItem[]>;
   updateComplianceItemStatus(id: number, status: string): Promise<ComplianceItem>;
-  
+
   // Document generation operations
   createGeneratedDocument(document: InsertGeneratedDocument): Promise<GeneratedDocument>;
   getGeneratedDocuments(companyId: number): Promise<GeneratedDocument[]>;
   getGeneratedDocument(id: number): Promise<GeneratedDocument | undefined>;
   updateGeneratedDocumentStatus(id: number, status: string): Promise<GeneratedDocument>;
-  
+
   // Document template operations
   getDocumentTemplates(category?: string): Promise<DocumentTemplate[]>;
   createDocumentTemplate(template: InsertDocumentTemplate): Promise<DocumentTemplate>;
   createBasicStarterDocumentsForCompany(companyId: number, tradeType: string, userId: string): Promise<GeneratedDocument[]>;
   createPremiumStarterDocumentsForCompany(companyId: number, tradeType: string, userId: string): Promise<GeneratedDocument[]>;
-  
+
   // Document annotation and review operations
   createDocumentAnnotation(annotation: InsertDocumentAnnotation): Promise<DocumentAnnotation>;
   getDocumentAnnotations(documentId: number): Promise<(DocumentAnnotation & { user: User })[]>;
   updateAnnotationStatus(id: number, status: string): Promise<DocumentAnnotation>;
   deleteDocumentAnnotation(id: number): Promise<void>;
-  
+
   createDocumentReview(review: InsertDocumentReview): Promise<DocumentReview>;
   getDocumentReviews(documentId: number): Promise<(DocumentReview & { reviewer: User })[]>;
   updateDocumentReviewStatus(documentId: number, reviewerId: string, status: string, comments?: string): Promise<DocumentReview>;
-  
+
   updateDocumentReviewStatus(documentId: number, reviewStatus: string, reviewerId?: string): Promise<GeneratedDocument>;
-  
+
   // Dashboard metrics
   getComplianceMetrics(companyId: number): Promise<{
     cscsCardsTotal: number;
@@ -192,7 +201,7 @@ export interface IStorage {
   // Email notifications
   sendDocumentNotification(documentId: number, companyId: number, type: string): Promise<boolean>;
   getUserNotifications(companyId: number): Promise<any[]>;
-  
+
   // Voucher code operations
   getVoucherByCode(code: string): Promise<VoucherCode | undefined>;
   createVoucher(voucher: InsertVoucherCode): Promise<VoucherCode>;
@@ -218,6 +227,38 @@ export class DatabaseStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
+  }
+
+  // Upsert user by id — used by external auth integrations
+  async upsertUser(userData: Partial<InsertUser>): Promise<User> {
+    // Try to find existing user by id
+    const existing = await this.getUser(userData.id as string);
+    if (existing) {
+      // Merge fields and update
+      const updates: Partial<InsertUser> = {
+        email: userData.email ?? existing.email,
+        firstName: (userData as any).firstName ?? (existing as any).firstName,
+        lastName: (userData as any).lastName ?? (existing as any).lastName,
+        profileImageUrl: (userData as any).profileImageUrl ?? (existing as any).profileImageUrl,
+        updatedAt: new Date(),
+      } as Partial<InsertUser>;
+      return await this.updateUser(existing.id, updates);
+    }
+
+    // Create new user
+    const toCreate: InsertUser = {
+      id: userData.id as string,
+      email: userData.email as string,
+      password: userData.password ?? `oauth_${Date.now()}`, // placeholder password for external-auth-created users
+      firstName: (userData as any).firstName ?? null,
+      lastName: (userData as any).lastName ?? null,
+      profileImageUrl: (userData as any).profileImageUrl ?? null,
+      emailVerified: userData.emailVerified ?? true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as InsertUser;
+
+    return await this.createUser(toCreate);
   }
 
   async createUser(userData: InsertUser): Promise<User> {
@@ -249,11 +290,11 @@ export class DatabaseStorage implements IStorage {
   async updateUserPlan(userId: string, selectedPlan: string, subscriptionType: string): Promise<User> {
     const [user] = await db
       .update(users)
-      .set({ 
+      .set({
         selectedPlan,
         subscriptionType,
         planStatus: "pending_payment",
-        updatedAt: new Date() 
+        updatedAt: new Date()
       })
       .where(eq(users.id, userId))
       .returning();
@@ -302,7 +343,7 @@ export class DatabaseStorage implements IStorage {
     // Remove used backup code
     const updatedCodes = user.backupCodes.filter((_, index) => index !== codeIndex);
     await this.updateUser(userId, { backupCodes: updatedCodes });
-    
+
     return true;
   }
 
@@ -329,14 +370,14 @@ export class DatabaseStorage implements IStorage {
   // Company operations
   async createCompany(company: InsertCompany): Promise<Company> {
     const [newCompany] = await db.insert(companies).values(company).returning();
-    
+
     // Add the owner as admin
     await db.insert(companyUsers).values({
       userId: company.ownerId,
       companyId: newCompany.id,
       role: "admin",
     });
-    
+
     return newCompany;
   }
 
@@ -367,7 +408,7 @@ export class DatabaseStorage implements IStorage {
         eq(companyUsers.userId, userId),
         eq(companies.isArchived, false) // Only show active companies
       ));
-    
+
     return result.map(r => r.company);
   }
 
@@ -429,10 +470,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getArchivedCompanies(userId?: string): Promise<Company[]> {
-    const whereClause = userId 
+    const whereClause = userId
       ? and(eq(companies.isArchived, true), eq(companies.ownerId, userId))
       : eq(companies.isArchived, true);
-    
+
     return await db.select().from(companies).where(whereClause);
   }
 
@@ -459,7 +500,7 @@ export class DatabaseStorage implements IStorage {
 
       // Finally delete the company itself
       await db.delete(companies).where(eq(companies.id, companyId));
-      
+
       return true;
     } catch (error) {
       console.error("Failed to permanently delete company:", error);
@@ -581,7 +622,7 @@ export class DatabaseStorage implements IStorage {
     if (subscriptions.length === 0) return [];
 
     const masterCompanyIds = subscriptions.map(s => s.masterCompanyId);
-    
+
     return await db
       .select()
       .from(masterCompanyUpdates)
@@ -601,7 +642,7 @@ export class DatabaseStorage implements IStorage {
       .from(companyUsers)
       .innerJoin(users, eq(companyUsers.userId, users.id))
       .where(eq(companyUsers.companyId, companyId));
-    
+
     return result.map(r => ({ ...r.company_users, user: r.users }));
   }
 
@@ -610,7 +651,7 @@ export class DatabaseStorage implements IStorage {
       .select({ role: companyUsers.role })
       .from(companyUsers)
       .where(and(eq(companyUsers.userId, userId), eq(companyUsers.companyId, companyId)));
-    
+
     return result?.role;
   }
 
@@ -627,7 +668,7 @@ export class DatabaseStorage implements IStorage {
   async getExpiringCSCSCards(companyId: number, days: number): Promise<CSCSCard[]> {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + days);
-    
+
     return await db
       .select()
       .from(cscsCards)
@@ -695,7 +736,7 @@ export class DatabaseStorage implements IStorage {
     const firstDayOfMonth = new Date();
     firstDayOfMonth.setDate(1);
     const firstDayString = firstDayOfMonth.toISOString().split('T')[0];
-    
+
     const [result] = await db
       .select({ count: count() })
       .from(toolboxTalks)
@@ -705,7 +746,7 @@ export class DatabaseStorage implements IStorage {
           gte(toolboxTalks.date, firstDayString)
         )
       );
-    
+
     return result.count;
   }
 
@@ -725,7 +766,7 @@ export class DatabaseStorage implements IStorage {
 
   async getOverdueComplianceItems(companyId: number): Promise<ComplianceItem[]> {
     const today = new Date().toISOString().split('T')[0];
-    
+
     return await db
       .select()
       .from(complianceItems)
@@ -741,9 +782,9 @@ export class DatabaseStorage implements IStorage {
   async updateComplianceItemStatus(id: number, status: string): Promise<ComplianceItem> {
     const [updated] = await db
       .update(complianceItems)
-      .set({ 
-        status, 
-        completedAt: status === "completed" ? new Date() : null 
+      .set({
+        status,
+        completedAt: status === "completed" ? new Date() : null
       })
       .where(eq(complianceItems.id, id))
       .returning();
@@ -848,7 +889,7 @@ export class DatabaseStorage implements IStorage {
           )
         );
     }
-    
+
     return await db
       .select()
       .from(documentTemplates)
@@ -866,41 +907,42 @@ export class DatabaseStorage implements IStorage {
   async createBasicStarterDocumentsForCompany(companyId: number, tradeType: string, userId: string): Promise<GeneratedDocument[]> {
     const { createBasicStarterDocuments } = await import("./iso9001Templates");
     const starterDocs = await createBasicStarterDocuments(companyId, tradeType, userId);
-    
+
     if (starterDocs.length === 0) {
       return [];
     }
-    
+
     const createdDocs = await db
       .insert(generatedDocuments)
       .values(starterDocs)
       .returning();
-      
+
     return createdDocs;
   }
 
   async createPremiumStarterDocumentsForCompany(companyId: number, tradeType: string, userId: string): Promise<GeneratedDocument[]> {
     const { createPremiumStarterDocuments } = await import("./iso9001Templates");
     const starterDocs = await createPremiumStarterDocuments(companyId, tradeType, userId);
-    
+
     if (starterDocs.length === 0) {
       return [];
     }
-    
+
     const createdDocs = await db
       .insert(generatedDocuments)
       .values(starterDocs)
       .returning();
-      
+
     return createdDocs;
   }
 
   // Document annotation operations
   async createDocumentAnnotation(annotation: InsertDocumentAnnotation): Promise<DocumentAnnotation> {
-    const [created] = await db
+    const createdResult: any = await db
       .insert(documentAnnotations)
       .values(annotation)
       .returning();
+    const [created] = createdResult as any[];
     return created;
   }
 
@@ -914,7 +956,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(documentAnnotations.userId, users.id))
       .where(eq(documentAnnotations.documentId, documentId))
       .orderBy(desc(documentAnnotations.createdAt));
-    
+
     return annotations.map(item => ({
       ...item.annotation,
       user: item.user!,
@@ -955,30 +997,48 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(users, eq(documentReviews.reviewerId, users.id))
       .where(eq(documentReviews.documentId, documentId))
       .orderBy(desc(documentReviews.createdAt));
-    
+
     return reviews.map(item => ({
       ...item.review,
       reviewer: item.reviewer!,
     }));
   }
 
-  async updateDocumentReviewStatus(documentId: number, reviewerId: string, status: string, comments?: string): Promise<DocumentReview> {
-    const [updated] = await db
-      .update(documentReviews)
-      .set({ 
-        status, 
-        comments,
-        completedAt: new Date(),
-        updatedAt: new Date() 
-      })
-      .where(
-        and(
-          eq(documentReviews.documentId, documentId),
-          eq(documentReviews.reviewerId, reviewerId)
+  // Flexible: supports two overloads from IStorage
+  // 1) updateDocumentReviewStatus(documentId, reviewerId, status, comments?) => DocumentReview
+  // 2) updateDocumentReviewStatus(documentId, reviewStatus, reviewerId?) => GeneratedDocument
+  async updateDocumentReviewStatus(documentId: number, a: string, b?: string, comments?: string): Promise<any> {
+    // If b is provided, treat as (documentId, reviewerId, status, comments?)
+    if (typeof b === 'string') {
+      const reviewerId = a;
+      const status = b;
+      const [updated] = await db
+        .update(documentReviews)
+        .set({
+          status,
+          comments: comments ?? null,
+          completedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(
+          and(
+            eq(documentReviews.documentId, documentId),
+            eq(documentReviews.reviewerId, reviewerId)
+          )
         )
-      )
+        .returning();
+      return updated;
+    }
+
+    // Otherwise treat as (documentId, reviewStatus, reviewerId?) => update generatedDocuments.reviewStatus
+    const reviewStatus = a;
+    const reviewerId = b;
+    const [updatedDoc] = await db
+      .update(generatedDocuments)
+      .set({ reviewStatus, updatedAt: new Date() })
+      .where(eq(generatedDocuments.id, documentId))
       .returning();
-    return updated;
+    return updatedDoc;
   }
 
   // Smart dashboard implementations
@@ -992,7 +1052,7 @@ export class DatabaseStorage implements IStorage {
     recentDocuments: any[];
   }> {
     const documents = await db.select().from(generatedDocuments).where(eq(generatedDocuments.companyId, companyId));
-    
+
     const completedDocuments = documents.filter(doc => doc.status === 'published' || doc.reviewStatus === 'approved').length;
     const documentsInProgress = documents.filter(doc => doc.status === 'generated' && doc.reviewStatus === 'pending').length;
     const overdueDocuments = documents.filter(doc => {
@@ -1000,7 +1060,7 @@ export class DatabaseStorage implements IStorage {
       const daysSinceCreated = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
       return daysSinceCreated > 7 && doc.reviewStatus === 'pending';
     }).length;
-    
+
     const complianceScore = documents.length > 0 ? Math.round((completedDocuments / documents.length) * 100) : 0;
     const recentDocuments = documents
       .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
@@ -1094,7 +1154,7 @@ export class DatabaseStorage implements IStorage {
 
     await db
       .update(generatedDocuments)
-      .set({ 
+      .set({
         reviewStatus: newStatus,
         updatedAt: new Date()
       })

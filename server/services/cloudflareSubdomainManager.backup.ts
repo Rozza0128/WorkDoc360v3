@@ -29,7 +29,7 @@ export class CloudflareSubdomainManager {
   constructor() {
     this.apiToken = process.env.CLOUDFLARE_API_TOKEN || '';
     this.zoneId = process.env.CLOUDFLARE_ZONE_ID || '';
-    
+
     if (!this.apiToken) {
       throw new Error('CLOUDFLARE_API_TOKEN environment variable is required');
     }
@@ -48,7 +48,7 @@ export class CloudflareSubdomainManager {
     try {
       // Generate a clean subdomain slug
       const subdomain = this.generateSubdomainSlug(businessName);
-      
+
       // Check if subdomain already exists
       const existingRecord = await this.checkSubdomainExists(subdomain);
       if (existingRecord) {
@@ -57,12 +57,12 @@ export class CloudflareSubdomainManager {
 
       // Create CNAME record pointing to main domain
       const record = await this.createDNSRecord(subdomain, 'CNAME', 'workdoc360.com');
-      
+
       // Update company record with subdomain
       await storage.updateCompanySubdomain(companyId, subdomain);
-      
+
       console.log(`✅ Created subdomain: ${subdomain}.workdoc360.com for company ID ${companyId}`);
-      
+
       return `${subdomain}.workdoc360.com`;
     } catch (error) {
       console.error('Error creating subdomain:', error);
@@ -89,10 +89,10 @@ export class CloudflareSubdomainManager {
       const response = await fetch(
         `${this.baseUrl}/zones/${this.zoneId}/dns_records?name=${subdomain}.workdoc360.com`,
         {
-          headers: {
+          headers: ({
             'Authorization': `Bearer ${this.apiToken}`,
             'Content-Type': 'application/json',
-          },
+          } as unknown) as HeadersInit,
         }
       );
 
@@ -108,8 +108,8 @@ export class CloudflareSubdomainManager {
    * Create a DNS record in Cloudflare
    */
   private async createDNSRecord(
-    subdomain: string, 
-    type: 'A' | 'CNAME', 
+    subdomain: string,
+    type: 'A' | 'CNAME',
     content: string
   ): Promise<CloudflareRecord> {
     const recordData = {
@@ -123,11 +123,11 @@ export class CloudflareSubdomainManager {
       `${this.baseUrl}/zones/${this.zoneId}/dns_records`,
       {
         method: 'POST',
-        headers: {
+        headers: ({
           'X-Auth-Email': process.env.CLOUDFLARE_EMAIL,
           'X-Auth-Key': this.apiToken,
           'Content-Type': 'application/json',
-        },
+        } as unknown) as HeadersInit,
         body: JSON.stringify(recordData),
       }
     );
@@ -150,15 +150,15 @@ export class CloudflareSubdomainManager {
       const response = await fetch(
         `${this.baseUrl}/zones/${this.zoneId}/dns_records?name=${subdomain}.workdoc360.com`,
         {
-          headers: {
+          headers: ({
             'Authorization': `Bearer ${this.apiToken}`,
             'Content-Type': 'application/json',
-          },
+          } as unknown) as HeadersInit,
         }
       );
 
       const data: CloudflareAPIResponse = await response.json();
-      
+
       if (!data.success || !data.result || data.result.length === 0) {
         console.log(`No DNS record found for ${subdomain}`);
         return false;
@@ -170,15 +170,15 @@ export class CloudflareSubdomainManager {
         `${this.baseUrl}/zones/${this.zoneId}/dns_records/${recordId}`,
         {
           method: 'DELETE',
-          headers: {
+          headers: ({
             'Authorization': `Bearer ${this.apiToken}`,
             'Content-Type': 'application/json',
-          },
+          } as unknown) as HeadersInit,
         }
       );
 
       const deleteData: CloudflareAPIResponse = await deleteResponse.json();
-      
+
       if (deleteData.success) {
         console.log(`✅ Deleted subdomain: ${subdomain}.workdoc360.com`);
         return true;
@@ -200,23 +200,23 @@ export class CloudflareSubdomainManager {
       const response = await fetch(
         `${this.baseUrl}/zones/${this.zoneId}/dns_records?per_page=100`,
         {
-          headers: {
+          headers: ({
             'Authorization': `Bearer ${this.apiToken}`,
             'Content-Type': 'application/json',
-          },
+          } as unknown) as HeadersInit,
         }
       );
 
       const data: CloudflareAPIResponse = await response.json();
-      
+
       if (data.success && data.result) {
-        return data.result.filter((record: CloudflareRecord) => 
-          record.name.includes('workdoc360.com') && 
+        return data.result.filter((record: CloudflareRecord) =>
+          record.name.includes('workdoc360.com') &&
           record.name !== 'workdoc360.com' &&
           record.name !== 'www.workdoc360.com'
         );
       }
-      
+
       return [];
     } catch (error) {
       console.error('Error listing subdomains:', error);

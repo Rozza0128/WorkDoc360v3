@@ -5,10 +5,10 @@
 
 import { Router } from "express";
 import { db } from "../db";
-import { 
-  masterTradeCompanies, 
-  masterDocuments, 
-  companySubscriptions, 
+import {
+  masterTradeCompanies,
+  masterDocuments,
+  companySubscriptions,
   updateRecommendations,
   industryExperts,
   companies,
@@ -66,7 +66,7 @@ router.get("/", async (req, res) => {
 router.get("/:tradeType", async (req, res) => {
   try {
     const { tradeType } = req.params;
-    
+
     // Get master trade company
     const [masterTrade] = await db
       .select()
@@ -133,7 +133,7 @@ router.get("/:tradeType", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const validatedData = insertMasterTradeCompanySchema.parse(req.body);
-    
+
     const [masterTrade] = await db
       .insert(masterTradeCompanies)
       .values(validatedData)
@@ -154,7 +154,7 @@ router.get("/:tradeType/documents", async (req, res) => {
   try {
     const { tradeType } = req.params;
     const { documentType, urgencyLevel, limit = 50 } = req.query;
-    
+
     // Get master trade company ID
     const [masterTrade] = await db
       .select({ id: masterTradeCompanies.id })
@@ -203,7 +203,7 @@ router.get("/:tradeType/documents", async (req, res) => {
 router.post("/:tradeType/documents", async (req, res) => {
   try {
     const { tradeType } = req.params;
-    
+
     // Get master trade company ID
     const [masterTrade] = await db
       .select({ id: masterTradeCompanies.id })
@@ -221,7 +221,7 @@ router.post("/:tradeType/documents", async (req, res) => {
       ...req.body,
       masterTradeId: masterTrade.id,
     });
-    
+
     const [document] = await db
       .insert(masterDocuments)
       .values(validatedData)
@@ -230,7 +230,7 @@ router.post("/:tradeType/documents", async (req, res) => {
     // Update document count in master trade company
     await db
       .update(masterTradeCompanies)
-      .set({ 
+      .set({
         totalDocuments: sql`${masterTradeCompanies.totalDocuments} + 1`,
         updatedAt: new Date()
       })
@@ -255,7 +255,7 @@ router.post("/:tradeType/subscribe", async (req, res) => {
     if (!companyId || !subscriptionTier) {
       return res.status(400).json({ error: "Company ID and subscription tier are required" });
     }
-    
+
     // Get master trade company
     const [masterTrade] = await db
       .select()
@@ -326,7 +326,7 @@ router.post("/:tradeType/subscribe", async (req, res) => {
     // Update member count in master trade company
     await db
       .update(masterTradeCompanies)
-      .set({ 
+      .set({
         totalMemberCompanies: sql`${masterTradeCompanies.totalMemberCompanies} + 1`,
         updatedAt: new Date()
       })
@@ -347,7 +347,7 @@ router.get("/:tradeType/updates", async (req, res) => {
   try {
     const { tradeType } = req.params;
     const { priority, status, limit = 20 } = req.query;
-    
+
     // Get master trade company ID
     const [masterTrade] = await db
       .select({ id: masterTradeCompanies.id })
@@ -393,7 +393,7 @@ router.get("/:tradeType/updates", async (req, res) => {
 router.post("/:tradeType/updates", async (req, res) => {
   try {
     const { tradeType } = req.params;
-    
+
     // Get master trade company ID
     const [masterTrade] = await db
       .select({ id: masterTradeCompanies.id })
@@ -423,7 +423,7 @@ router.post("/:tradeType/updates", async (req, res) => {
       masterTradeId: masterTrade.id,
       targetCompanyIds,
     });
-    
+
     const [updateRecommendation] = await db
       .insert(updateRecommendations)
       .values(validatedData)
@@ -472,7 +472,7 @@ router.post("/initialize-defaults", async (req, res) => {
 
         const [created] = await db
           .insert(masterTradeCompanies)
-          .values([masterTradeData])
+          .values([masterTradeData as any])
           .returning();
 
         createdMasterTrades.push(created);

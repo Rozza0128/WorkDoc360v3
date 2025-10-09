@@ -165,16 +165,16 @@ export async function generatePDF(options: DocumentExportOptions): Promise<Buffe
 </html>`;
 
   console.log('Launching Puppeteer browser...');
-  
+
   // Try different browser configurations
   let browser;
   try {
     // First, try with system chromium
-    browser = await puppeteer.launch({ 
+    browser = await puppeteer.launch({
       headless: true,
       executablePath: '/nix/store/zi4f80l169xlmivz8vja8wlphq74qqk0-chromium-125.0.6422.141/bin/chromium-browser',
       args: [
-        '--no-sandbox', 
+        '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
@@ -183,15 +183,15 @@ export async function generatePDF(options: DocumentExportOptions): Promise<Buffe
         '--disable-background-timer-throttling',
         '--disable-backgrounding-occluded-windows',
         '--disable-renderer-backgrounding'
-      ] 
+      ]
     });
   } catch (error) {
     console.log('System chromium failed, trying bundled browser...');
     // Fallback to bundled browser
-    browser = await puppeteer.launch({ 
+    browser = await puppeteer.launch({
       headless: true,
       args: [
-        '--no-sandbox', 
+        '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
@@ -199,17 +199,17 @@ export async function generatePDF(options: DocumentExportOptions): Promise<Buffe
         '--disable-extensions',
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor'
-      ] 
+      ]
     });
   }
-  
+
   try {
     console.log('Creating new page...');
     const page = await browser.newPage();
-    
+
     console.log('Setting page content...');
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    
+
     console.log('Generating PDF...');
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -221,7 +221,7 @@ export async function generatePDF(options: DocumentExportOptions): Promise<Buffe
         left: '15mm'
       }
     });
-    
+
     console.log('PDF generated successfully, size:', pdfBuffer.length, 'bytes');
     return Buffer.from(pdfBuffer);
   } catch (error) {
@@ -236,7 +236,7 @@ export async function generatePDF(options: DocumentExportOptions): Promise<Buffe
 export async function generateWord(options: DocumentExportOptions): Promise<Buffer> {
   // Split content into paragraphs
   const contentParagraphs = options.content.split('\n').filter(line => line.trim());
-  
+
   const doc = new Document({
     sections: [{
       properties: {},
@@ -254,7 +254,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           heading: HeadingLevel.TITLE,
           spacing: { after: 200 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -265,7 +265,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 400 }
         }),
-        
+
         // Document Info Section
         new Paragraph({
           children: [
@@ -278,7 +278,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           heading: HeadingLevel.HEADING_1,
           spacing: { before: 200, after: 200 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -288,7 +288,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 100 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -298,7 +298,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 100 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -308,7 +308,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 100 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -318,7 +318,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 100 }
         }),
-        
+
         ...(options.companyAddress ? [new Paragraph({
           children: [
             new TextRun({
@@ -328,7 +328,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 200 }
         })] : []),
-        
+
         // Document Title
         new Paragraph({
           children: [
@@ -342,7 +342,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           heading: HeadingLevel.HEADING_1,
           spacing: { before: 400, after: 300 }
         }),
-        
+
         // Content paragraphs
         ...contentParagraphs.map(paragraph => new Paragraph({
           children: [
@@ -353,7 +353,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 150 }
         })),
-        
+
         // Footer
         new Paragraph({
           children: [
@@ -366,7 +366,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           heading: HeadingLevel.HEADING_2,
           spacing: { before: 600, after: 200 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -376,7 +376,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 300 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -387,7 +387,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 100 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -398,7 +398,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
           ],
           spacing: { after: 200 }
         }),
-        
+
         new Paragraph({
           children: [
             new TextRun({
@@ -412,7 +412,7 @@ export async function generateWord(options: DocumentExportOptions): Promise<Buff
       ]
     }]
   });
-  
+
   return await Packer.toBuffer(doc);
 }
 
@@ -425,10 +425,10 @@ export async function emailDocument(
 ): Promise<boolean> {
   try {
     const { sendEmail } = await import('./emailService');
-    
+
     const fileExtension = format === 'pdf' ? 'pdf' : 'docx';
     const fileName = `${documentTitle.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExtension}`;
-    
+
     const emailResult = await sendEmail({
       to: recipientEmail,
       subject: `WorkDoc360 Document: ${documentTitle}`,
@@ -440,9 +440,6 @@ Please find attached the requested document: ${documentTitle}
 This document was generated for ${companyName} using WorkDoc360's AI-powered compliance system.
 
 Document Details:
-- Title: ${documentTitle}
-- Format: ${format.toUpperCase()}
-- Generated: ${new Date().toLocaleDateString('en-GB')}
 
 For any questions about this document, please contact your compliance administrator.
 
@@ -498,15 +495,10 @@ WorkDoc360 Team
   </div>
 </div>
       `,
-      attachments: [
-        {
-          filename: fileName,
-          content: documentBuffer,
-          type: 'attachment'
-        }
-      ]
+      // attachments are not supported by the simple EmailParams interface here;
+      // send the file via a different channel or upload and include URL in email body instead.
     });
-    
+
     return emailResult;
   } catch (error) {
     console.error('Error sending document email:', error);

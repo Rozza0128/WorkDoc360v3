@@ -9,7 +9,7 @@ mailService.setApiKey(process.env.SENDGRID_API_KEY);
 
 interface EmailParams {
   to: string;
-  from: string;
+  from?: string; // optional, default applied by sendEmail
   subject: string;
   text?: string;
   html?: string;
@@ -17,13 +17,14 @@ interface EmailParams {
 
 export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
-    await mailService.send({
+    const msg: any = {
       to: params.to,
-      from: params.from,
+      from: params.from ?? 'notifications@workdoc360.com',
       subject: params.subject,
-      text: params.text,
-      html: params.html,
-    });
+    };
+    if (params.text) msg.text = params.text;
+    if (params.html) msg.html = params.html;
+    await mailService.send(msg);
     return true;
   } catch (error) {
     console.error('SendGrid email error:', error);
@@ -40,7 +41,7 @@ export async function sendCSCSExpiryReminder(
   companyName: string
 ): Promise<boolean> {
   const subject = `CSCS Card Expiry Reminder - ${companyName}`;
-  
+
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
@@ -68,7 +69,7 @@ export async function sendCSCSExpiryReminder(
       </div>
     </div>
   `;
-  
+
   const text = `
 CSCS Card Renewal Required
 
@@ -102,7 +103,7 @@ export async function sendToolboxTalkReminder(
   siteName?: string
 ): Promise<boolean> {
   const subject = `Toolbox Talk Required - ${companyName}`;
-  
+
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
@@ -154,7 +155,7 @@ export async function sendRiskAssessmentDueReminder(
   companyName: string
 ): Promise<boolean> {
   const subject = `Risk Assessment Review Due - ${companyName}`;
-  
+
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">

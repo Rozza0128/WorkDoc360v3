@@ -14,17 +14,19 @@ const router = express.Router();
 router.post('/scrape-website', requireAuth, async (req, res) => {
   try {
     const { websiteUrl } = req.body;
-    
+
     if (!websiteUrl) {
       return res.status(400).json({ error: 'Website URL is required' });
     }
 
-    console.log(`Scraping website for user ${req.session.userId}: ${websiteUrl}`);
-    
+    const sessionAny: any = req.session;
+    const userId = sessionAny.userId;
+    console.log(`Scraping website for user ${userId}: ${websiteUrl}`);
+
     const companyDetails = await scrapeCompanyWebsite(websiteUrl);
-    
+
     // Store the scraped data in the database
-    const user = await storage.getUserById(req.session.userId);
+    const user = await storage.getUser(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -57,10 +59,10 @@ router.post('/scrape-website', requireAuth, async (req, res) => {
     }
 
     res.json(companyDetails);
-    
+
   } catch (error) {
     console.error('Website scraping error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to scrape website',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -71,19 +73,22 @@ router.post('/scrape-website', requireAuth, async (req, res) => {
 router.post('/generate-documents', requireAuth, async (req, res) => {
   try {
     const { companyId, documents, context } = req.body;
-    
+
     if (!companyId || !documents || !Array.isArray(documents) || documents.length === 0) {
       return res.status(400).json({ error: 'Invalid request parameters' });
     }
 
-    const user = await storage.getUserById(req.session.userId);
+    const sessionAny: any = req.session;
+    const userId = sessionAny.userId;
+    const user = await storage.getUser(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Verify user has access to the company
-    const userCompany = await storage.getCompanyUserByIds(user.id, companyId);
-    if (!userCompany) {
+    // Check access: storage exposes getUserRole / getCompanyUsers
+    const userRole = await storage.getUserRole(user.id, companyId);
+    if (!userRole) {
       return res.status(403).json({ error: 'Access denied to company' });
     }
 
@@ -129,19 +134,21 @@ router.post('/generate-documents', requireAuth, async (req, res) => {
             context
           );
 
-          // Store the generated document
+          // Store the generated document - only pass fields that match InsertGeneratedDocument
           const storedDoc = await storage.createGeneratedDocument({
             companyId,
+            templateType: generatedDoc.documentType || 'ai_generated',
             documentName: generatedDoc.title,
-            documentType: generatedDoc.documentType,
-            content: generatedDoc.content,
             siteName: context.companyName || 'Main Site',
+            siteAddress: (context && (context.siteAddress || '')) || '',
+            projectManager: user.id,
+            hazards: '',
+            controlMeasures: '',
+            specialRequirements: '',
+            // Set source/type tracking
+            sourceType: 'ai_custom',
             generatedBy: user.id,
-            reviewStatus: 'draft',
-            wordCount: generatedDoc.wordCount,
-            sections: generatedDoc.sections,
-            aiGenerated: true,
-            documentId: document.id
+            reviewStatus: 'draft'
           });
 
           generatedDocuments.push({
@@ -150,7 +157,7 @@ router.post('/generate-documents', requireAuth, async (req, res) => {
           });
 
           sendUpdate('document', { document: storedDoc });
-          
+
         } catch (docError) {
           console.error(`Error generating document ${document.title}:`, docError);
           sendUpdate('error', {
@@ -183,10 +190,10 @@ router.post('/generate-documents', requireAuth, async (req, res) => {
     }
 
     res.end();
-    
+
   } catch (error) {
     console.error('Document generation API error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to start document generation',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
@@ -197,21 +204,21 @@ router.post('/generate-documents', requireAuth, async (req, res) => {
 router.get('/document-recommendations/:tradeType', requireAuth, async (req, res) => {
   try {
     const { tradeType } = req.params;
-    
+
     // Import dynamically to avoid circular dependency issues
     const { getRecommendationsForTrade } = await import('../../shared/document-recommendations');
     const recommendations = getRecommendationsForTrade(tradeType);
-    
+
     res.json({
       tradeType,
       recommendations,
       totalRecommendations: recommendations.length,
       essentialCount: recommendations.filter(doc => doc.priority === 'essential').length
     });
-    
+
   } catch (error) {
     console.error('Error getting recommendations:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to get document recommendations',
       message: error instanceof Error ? error.message : 'Unknown error'
     });

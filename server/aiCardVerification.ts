@@ -34,7 +34,7 @@ export interface CSCSRegisterCheck {
 }
 
 export class AICardVerificationService {
-  
+
   /**
    * Analyse CSCS card image using Claude AI vision
    */
@@ -103,7 +103,7 @@ Format response as JSON with these fields:
       });
 
       const analysisText = response.content[0].type === 'text' ? response.content[0].text : '';
-      
+
       // Extract JSON from the response
       const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
@@ -111,10 +111,10 @@ Format response as JSON with these fields:
       }
 
       const analysis: CardImageAnalysis = JSON.parse(jsonMatch[0]);
-      
+
       // Validate and clean the analysis
       return this.validateAnalysis(analysis);
-      
+
     } catch (error) {
       console.error('AI card analysis failed:', error);
       return {
@@ -144,17 +144,17 @@ Format response as JSON with these fields:
   async checkCSCSRegister(cardNumber: string, holderName?: string): Promise<CSCSRegisterCheck> {
     // This would integrate with the official CSCS verification system
     // Currently, CSCS provides a web checker at cscs.uk.com but no public API
-    
+
     try {
       // Placeholder for CSCS register integration
       // In practice, this might involve:
       // 1. Web scraping the CSCS checker (not recommended)
       // 2. Official API partnership with CSCS
       // 3. Integration with third-party verification services
-      
+
       const registerResult = await this.queryCSCSDatabase(cardNumber, holderName);
       return registerResult;
-      
+
     } catch (error) {
       console.error('CSCS register check failed:', error);
       return {
@@ -178,7 +178,7 @@ Format response as JSON with these fields:
   }> {
     // Step 1: Analyse the card image
     const imageAnalysis = await this.analyseCardImage(imageBase64);
-    
+
     let registerCheck: CSCSRegisterCheck | null = null;
     let overallResult: CSCSVerificationResult;
 
@@ -206,7 +206,7 @@ Format response as JSON with these fields:
 
     // For demo purposes, simulate some responses
     // In production, this would make actual API calls to CSCS
-    
+
     // Simulate different scenarios based on card number patterns
     if (cardNumber.startsWith('1234')) {
       return {
@@ -241,7 +241,7 @@ Format response as JSON with these fields:
   ): CSCSVerificationResult {
     const warnings: string[] = [];
     const recommendations: string[] = [];
-    
+
     // Check image quality
     if (imageAnalysis.qualityScore < 70) {
       warnings.push('Image quality is poor - recommend retaking photo');
@@ -268,9 +268,9 @@ Format response as JSON with these fields:
 
     if (registerCheck) {
       // We have register information
-      status = registerCheck.cardStatus === 'ACTIVE' ? 'VALID' : 
-               registerCheck.cardStatus === 'EXPIRED' ? 'EXPIRED' :
-               registerCheck.cardStatus === 'SUSPENDED' ? 'SUSPENDED' : 'INVALID';
+      status = registerCheck.cardStatus === 'ACTIVE' ? 'VALID' :
+        registerCheck.cardStatus === 'EXPIRED' ? 'EXPIRED' :
+          registerCheck.cardStatus === 'SUSPENDED' ? 'SUSPENDED' : 'INVALID';
       isValid = status === 'VALID';
     } else if (imageAnalysis.cardNumber && imageAnalysis.fraudIndicators.length === 0) {
       // No register check but image looks legitimate
@@ -283,7 +283,8 @@ Format response as JSON with these fields:
       isValid,
       cardNumber: imageAnalysis.cardNumber || '',
       holderName: imageAnalysis.holderName ?? undefined,
-      cardType: imageAnalysis.cardType,
+      // Convert null -> undefined to match CSCSVerificationResult.cardType?: string
+      cardType: imageAnalysis.cardType ?? undefined,
       expiryDate: imageAnalysis.expiryDate || undefined,
       status,
       lastChecked: new Date(),

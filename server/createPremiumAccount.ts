@@ -4,17 +4,17 @@ import type { InsertUser, InsertCompany, InsertCompanyUser } from "@shared/schem
 
 export async function createRobAndSonAccount() {
   console.log("Creating premium test account for Rob & Son Scaffolding...");
-  
+
   try {
     // Check if account already exists (check both old and new email)
     let existingUser = await storage.getUserByEmail("info@rnsscaff.co.uk");
     if (!existingUser) {
       existingUser = await storage.getUserByEmail("robandsonscaffoldingservicesltd@gmail.com");
     }
-    
+
     if (existingUser) {
       console.log("Rob & Son account already exists. ID:", existingUser.id);
-      
+
       // Update email if using old email
       if (existingUser.email === "robandsonscaffoldingservicesltd@gmail.com") {
         console.log("Updating email to official business address...");
@@ -23,7 +23,7 @@ export async function createRobAndSonAccount() {
         });
         console.log("✅ Email updated to:", existingUser.email);
       }
-      
+
       // Update password to ensure it's properly hashed
       console.log("Updating password to ensure proper hashing...");
       const hashedPassword = await hashPassword("RobScaffolding2025!");
@@ -31,15 +31,15 @@ export async function createRobAndSonAccount() {
         password: hashedPassword
       });
       console.log("✅ Password updated with proper hashing");
-      
+
       // Get the company and return complete data
       const companies = await storage.getCompaniesByUserId(existingUser.id);
       const company = companies.find(c => c.name.includes("Rob & Son"));
-      
+
       if (company) {
         const companyUsers = await storage.getCompanyUsers(company.id);
-        const companyUser = companyUsers.find(cu => cu.userId === existingUser.id);
-        
+        const companyUser = companyUsers.find(cu => cu.userId === existingUser?.id);
+
         return {
           user: existingUser,
           company,
@@ -139,7 +139,7 @@ export async function createRobAndSonAccount() {
 // Additional utility to create sample documents for testing
 export async function createSampleDocuments(companyId: number, userId: string) {
   console.log("Creating sample documents for testing...");
-  
+
   const sampleDocs = [
     {
       templateType: "scaffold-risk-assessment",
@@ -152,7 +152,7 @@ export async function createSampleDocuments(companyId: number, userId: string) {
       specialRequirements: "Residential area considerations, Parking restrictions, Neighbour consultation"
     },
     {
-      templateType: "scaffold-method-statement", 
+      templateType: "scaffold-method-statement",
       documentName: "Commercial Scaffolding Method Statement - Business Park",
       siteName: "Commercial Building Maintenance",
       siteAddress: "Erdington Business Park, Birmingham, B24 9QR",
@@ -167,7 +167,7 @@ export async function createSampleDocuments(companyId: number, userId: string) {
       siteName: "Industrial Manufacturing Facility",
       siteAddress: "Castle Vale Industrial Estate, Birmingham, B35 7AG",
       projectManager: "Rob Son",
-      hazards: "Heavy-duty structures, Industrial processes, Health & safety regulations, Load requirements", 
+      hazards: "Heavy-duty structures, Industrial processes, Health & safety regulations, Load requirements",
       controlMeasures: "Competent person inspections, Load calculations, Regular maintenance, Safety protocols",
       specialRequirements: "Industrial standards compliance, Worker safety priority, Regulatory adherence"
     }
@@ -191,7 +191,7 @@ export async function createSampleDocuments(companyId: number, userId: string) {
         generatedBy: userId,
         reviewStatus: 'approved'
       });
-      
+
       console.log(`✅ Sample document created: ${document.documentName}`);
     } catch (error) {
       console.error(`❌ Error creating sample document: ${docData.documentName}`, error);

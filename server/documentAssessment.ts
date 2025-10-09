@@ -50,9 +50,9 @@ export async function assessDocument(
   tradeType: string,
   companyName: string
 ): Promise<DocumentAssessmentResult> {
-  
+
   const tradeSpecificRequirements = getTradeRequirements(tradeType);
-  
+
   const systemPrompt = `You are a UK construction compliance expert specializing in document assessment for ${tradeType} companies. 
 
 Your role is to thoroughly assess construction compliance documents against:
@@ -136,21 +136,22 @@ Focus on practical, actionable improvements that will enhance compliance and saf
     });
 
     const assessmentText = response.content[0].type === 'text' ? response.content[0].text : '';
-    
+
     // Extract JSON from the response
     const jsonMatch = assessmentText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('No valid JSON found in AI response');
     }
-    
+
     const assessmentResult: DocumentAssessmentResult = JSON.parse(jsonMatch[0]);
-    
+
     // Validate and clean the result
     return validateAssessmentResult(assessmentResult);
-    
+
   } catch (error) {
-    console.error('Error in document assessment:', error);
-    throw new Error(`Failed to assess document: ${error.message}`);
+    const msg = (error && (error as any).message) ? (error as any).message : String(error);
+    console.error('Error in document assessment:', msg);
+    throw new Error(`Failed to assess document: ${msg}`);
   }
 }
 
@@ -181,8 +182,8 @@ function getTradeRequirements(tradeType: string): string {
 - Emergency procedures and incident reporting
     `
   };
-  
-  return requirements[tradeType] || requirements['general_building'];
+
+  return (requirements as Record<string, string>)[tradeType] || requirements['general_building'];
 }
 
 function validateAssessmentResult(result: any): DocumentAssessmentResult {
@@ -203,7 +204,7 @@ export async function generateImprovementDocument(
   companyName: string,
   tradeType: string
 ): Promise<string> {
-  
+
   const systemPrompt = `You are a UK construction compliance consultant creating improvement documents. 
   
 Generate a professional improvement plan document that addresses the identified gaps and recommendations.
@@ -251,7 +252,8 @@ Format as a professional business document.`;
 
     return response.content[0].type === 'text' ? response.content[0].text : '';
   } catch (error) {
-    console.error('Error generating improvement document:', error);
-    throw new Error(`Failed to generate improvement plan: ${error.message}`);
+    const msg = (error && (error as any).message) ? (error as any).message : String(error);
+    console.error('Error generating improvement document:', msg);
+    throw new Error(`Failed to generate improvement plan: ${msg}`);
   }
 }

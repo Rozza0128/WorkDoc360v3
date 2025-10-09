@@ -11,7 +11,7 @@ import { insertGeneratedDocumentSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs/promises";
-import { 
+import {
   insertCompanySchema,
   insertRiskAssessmentSchema,
   insertMethodStatementSchema,
@@ -52,7 +52,7 @@ if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 }
 
-const upload = multer({ 
+const upload = multer({
   storage: storage_multer,
   limits: {
     fileSize: 10 * 1024 * 1024 // 10MB limit
@@ -63,7 +63,7 @@ const upload = multer({
       mimetype: file.mimetype,
       originalname: file.originalname
     });
-    
+
     // Allow images for logo upload
     if (req.path.includes('upload-logo')) {
       const allowedImageTypes = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif'];
@@ -71,7 +71,7 @@ const upload = multer({
         return cb(null, true);
       }
     }
-    
+
     // Allow documents for document upload
     if (req.path.includes('upload-documents') || req.path.includes('assess-documents')) {
       const allowedDocTypes = [
@@ -86,7 +86,7 @@ const upload = multer({
       if (allowedDocTypes.includes(file.mimetype)) {
         return cb(null, true);
       }
-      
+
       // Also allow common file types even if mimetype is not recognized
       const extension = path.extname(file.originalname).toLowerCase();
       const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt', '.xls', '.xlsx', '.json'];
@@ -94,7 +94,7 @@ const upload = multer({
         return cb(null, true);
       }
     }
-    
+
     cb(new Error(`Invalid file type: ${file.mimetype} (${file.originalname})`));
   }
 });
@@ -105,9 +105,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Add basic health check endpoint
   app.get('/api/health', (req: any, res) => {
-    res.json({ 
-      status: 'ok', 
-      hostname: req.hostname, 
+    res.json({
+      status: 'ok',
+      hostname: req.hostname,
       isCompanySubdomain: req.isCompanySubdomain || false,
       timestamp: new Date().toISOString()
     });
@@ -118,10 +118,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Company-specific routes
   app.use(companyRoutes);
-  
+
   // Cloudflare subdomain management routes
   app.use('/api/cloudflare', cloudflareSubdomainRoutes);
-  
+
   // Test routes for Cloudflare subdomain automation
   const { testCloudflareRoutes } = await import('./routes/testCloudflareSubdomain');
   app.use('/api/test', testCloudflareRoutes);
@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user is admin (you may want to add proper admin check)
       console.log('🔧 Setting up pre-loaded subdomain pool...');
       const result = await preloadedSubdomainManager.setupPreloadedSubdomains();
-      
+
       res.json({
         message: 'Subdomain pool setup completed',
         ...result
@@ -157,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { count = 10 } = req.body;
       await preloadedSubdomainManager.expandSubdomainPool(count);
-      
+
       res.json({
         message: `Added ${count} new subdomains to the pool`
       });
@@ -173,15 +173,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const companyId = parseInt(req.params.id);
       const { newSlug } = req.body;
       const userId = req.user.id;
-      
+
       // Check if user has admin access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role || role !== "admin") {
         return res.status(403).json({ message: "Only company admins can change subdomains" });
       }
-      
+
       const success = await preloadedSubdomainManager.updateCompanySubdomain(companyId, newSlug);
-      
+
       if (success) {
         res.json({
           success: true,
@@ -226,10 +226,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
 
-        res.json({ 
-          success: true, 
+        res.json({
+          success: true,
           message: "Test login successful",
-          user: testUser 
+          user: testUser
         });
       } catch (error) {
         console.error("Error in test login:", error);
@@ -249,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/mobile/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      
+
       if (!email || !password) {
         return res.status(400).json({ error: "Email and password required" });
       }
@@ -267,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate JWT or session token for mobile
       const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
-      
+
       const { password: _, ...userWithoutPassword } = user;
       res.json({
         success: true,
@@ -284,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/mobile/register", async (req, res) => {
     try {
       const { email, password, firstName, lastName } = req.body;
-      
+
       // Validation
       if (!email || !password || !firstName) {
         return res.status(400).json({ error: "Email, password, and first name are required" });
@@ -297,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(409).json({ 
+        return res.status(409).json({
           error: "Account already exists",
           message: "You already have an account with this email address. Please log in instead.",
           action: "login"
@@ -316,7 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate token
       const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
-      
+
       const { password: _, ...userWithoutPassword } = user;
       res.status(201).json({
         success: true,
@@ -341,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const token = authHeader.substring(7);
       const decoded = Buffer.from(token, 'base64').toString('utf-8');
       const [userId] = decoded.split(':');
-      
+
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(401).json({ error: "Invalid token" });
@@ -369,8 +369,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const code = await TwoFactorService.sendSMSCode(userId, user.phoneNumber);
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: "SMS code sent successfully",
         ...(process.env.NODE_ENV === 'development' && { code }) // Only in development
       });
@@ -384,13 +384,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { code } = req.body;
       const userId = req.user?.id;
-      
+
       if (!userId || !code) {
         return res.status(400).json({ error: "User ID and code required" });
       }
 
       const isValid = await TwoFactorService.verifyCode(userId, code, "sms");
-      
+
       if (isValid) {
         res.json({ success: true, message: "SMS code verified successfully" });
       } else {
@@ -406,7 +406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { phoneNumber } = req.body;
       const userId = req.user?.id;
-      
+
       if (!userId) {
         return res.status(401).json({ error: "Not authenticated" });
       }
@@ -420,9 +420,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const formattedPhone = formatUKPhoneNumber(phoneNumber);
 
       await storage.updateUserPhone(userId, formattedPhone);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: "Phone number updated successfully",
         phoneNumber: formattedPhone
       });
@@ -437,7 +437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { selectedPlan, subscriptionType } = req.body;
       const userId = req.user?.id;
-      
+
       if (!userId) {
         return res.status(401).json({ error: "Not authenticated" });
       }
@@ -460,9 +460,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update user's plan selection
       await storage.updateUserPlan(userId, selectedPlan, subscriptionType);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: "Plan selected successfully",
         selectedPlan,
         subscriptionType,
@@ -478,7 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { recipientId, type, data } = req.body;
       const senderId = req.user?.id;
-      
+
       if (!senderId || !recipientId || !type) {
         return res.status(400).json({ error: "Sender, recipient, and notification type required" });
       }
@@ -568,16 +568,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/password-reset/request", async (req, res) => {
     try {
       const { email } = req.body;
-      
+
       if (!email || !email.trim()) {
-        return res.status(400).json({ 
-          error: "Email address is required" 
+        return res.status(400).json({
+          error: "Email address is required"
         });
       }
 
       const { PasswordResetService } = await import("./passwordReset");
       const result = await PasswordResetService.createResetToken(email.toLowerCase().trim());
-      
+
       if (result.success) {
         // In development, also return the token for testing (remove in production)
         const isDev = process.env.NODE_ENV === 'development';
@@ -603,7 +603,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/password-reset/verify/:token", async (req, res) => {
     try {
       const { token } = req.params;
-      
+
       if (!token) {
         return res.status(400).json({
           valid: false,
@@ -613,7 +613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { PasswordResetService } = await import("./passwordReset");
       const result = await PasswordResetService.verifyResetToken(token);
-      
+
       res.json({
         valid: result.valid,
         message: result.message
@@ -630,7 +630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/password-reset/complete", async (req, res) => {
     try {
       const { token, newPassword } = req.body;
-      
+
       if (!token || !newPassword) {
         return res.status(400).json({
           success: false,
@@ -647,7 +647,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { PasswordResetService } = await import("./passwordReset");
       const result = await PasswordResetService.resetPassword(token, newPassword);
-      
+
       if (result.success) {
         res.json({
           success: true,
@@ -672,7 +672,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      
+
       if (!email || !password) {
         return res.status(400).json({ error: "Email and password required" });
       }
@@ -694,7 +694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Session login error:", err);
           return res.status(500).json({ error: "Login session failed" });
         }
-        
+
         const { password: _, ...userWithoutPassword } = user;
         res.json(userWithoutPassword);
       });
@@ -708,7 +708,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/register", async (req, res) => {
     try {
       const { email, password, firstName, lastName, selectedPlan, subscriptionType } = req.body;
-      
+
       if (!email || !password || !firstName) {
         return res.status(400).json({ error: "Email, password, and first name are required" });
       }
@@ -720,7 +720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(409).json({ 
+        return res.status(409).json({
           error: "Account already exists",
           message: "You already have an account with this email address. Please log in instead.",
           action: "login"
@@ -746,7 +746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Session registration error:", err);
           return res.status(500).json({ error: "Registration session failed" });
         }
-        
+
         const { password: _, ...userWithoutPassword } = user;
         res.json(userWithoutPassword);
       });
@@ -760,7 +760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/analyze-trade-type", requireAuth, async (req: any, res) => {
     try {
       const { tradeDescription, additionalInfo } = req.body;
-      
+
       if (!tradeDescription || !tradeDescription.trim()) {
         return res.status(400).json({ error: "Trade description is required" });
       }
@@ -926,7 +926,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
   app.post("/api/add-analyzed-trade", requireAuth, async (req: any, res) => {
     try {
       const { tradeData } = req.body;
-      
+
       if (!tradeData || !tradeData.value || !tradeData.title) {
         return res.status(400).json({ error: "Trade data with value and title required" });
       }
@@ -934,11 +934,11 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       // For now, we'll just confirm the trade was "added" 
       // In a real system, you'd store this in a database or update a config file
       console.log("New trade analyzed and added:", tradeData);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: `Trade "${tradeData.title}" has been added to the system`,
-        tradeData 
+        tradeData
       });
     } catch (error) {
       console.error("Add trade error:", error);
@@ -952,17 +952,17 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       if (!req.user || !req.user.id) {
         return res.status(401).json({ error: "User not found in request" });
       }
-      
+
       const userId = req.user.id;
-      
+
       // CRITICAL: One company per account limit to prevent database confusion
       const existingUserCompanies = await storage.getUserCompanies(userId);
       if (existingUserCompanies.length > 0) {
         const existingCompany = existingUserCompanies[0];
-        
+
         // Return the existing company instead of error (for duplicate submissions)
         console.log(`⚠️ User ${userId} already has company: ${existingCompany.name}`);
-        return res.status(200).json({ 
+        return res.status(200).json({
           id: existingCompany.id,
           name: existingCompany.name,
           message: "Company already exists",
@@ -971,16 +971,16 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
           dashboardUrl: "/dashboard"
         });
       }
-      
+
       console.log('Company creation: Allowing registration for user:', userId);
-      
+
       // First check if company with same name already exists
       const existingCompanies = await storage.getCompaniesByName(req.body.name);
       if (existingCompanies.length > 0) {
         const existingCompany = existingCompanies[0];
-        return res.status(409).json({ 
+        return res.status(409).json({
           message: "Company name already exists",
-          error: "DUPLICATE_COMPANY_NAME", 
+          error: "DUPLICATE_COMPANY_NAME",
           existingCompanyName: existingCompany.name,
           suggestion: "If this is your company, please log in to your existing account instead of creating a new one.",
           loginUrl: "/auth",
@@ -993,7 +993,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
         ownerId: userId,
       });
 
-      const company = await storage.createCompany(validatedData);
+      const company = await storage.createCompany(validatedData as any);
 
       // Add the user as admin to the company
       await storage.addUserToCompany({
@@ -1012,7 +1012,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
 
       // Skip pre-loaded subdomain assignment to avoid conflicts
       console.log(`🚀 Creating subdomain for ${company.name}...`);
-      
+
       // FIXED: Generate unique slug with fallback for duplicates
       let desiredSlug = company.name
         .toLowerCase()
@@ -1021,11 +1021,11 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
         .replace(/-+/g, '-')
         .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
         .substring(0, 15); // Shorter to allow for suffixes
-      
+
       // Check if slug already exists and add number suffix if needed
       let finalSlug = desiredSlug;
       let counter = 1;
-      
+
       while (true) {
         try {
           const existingCompany = await storage.getCompanyBySlug(finalSlug);
@@ -1039,10 +1039,10 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
           break;
         }
       }
-        
+
       // Update company with unique slug
       await storage.updateCompany(company.id, { companySlug: finalSlug });
-      
+
       console.log(`✅ Company ${company.name} is now live at: ${finalSlug}.workdoc360.co.uk`);
       res.json({
         ...company,
@@ -1082,9 +1082,9 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       }
 
       const archivedCompany = await storage.archiveCompany(companyId, userId, reason);
-      res.json({ 
+      res.json({
         message: "Company archived successfully. You can restore it anytime from your account settings.",
-        company: archivedCompany 
+        company: archivedCompany
       });
     } catch (error) {
       console.error("Error archiving company:", error);
@@ -1104,9 +1104,9 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       }
 
       const restoredCompany = await storage.restoreCompany(companyId);
-      res.json({ 
+      res.json({
         message: "Company restored successfully!",
-        company: restoredCompany 
+        company: restoredCompany
       });
     } catch (error) {
       console.error("Error restoring company:", error);
@@ -1158,7 +1158,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const { tradeType } = req.params;
       const masterCompanies = await storage.getMasterCompaniesForTrade(tradeType);
-      
+
       res.json({
         tradeType,
         masterCompanies,
@@ -1175,7 +1175,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const { tradeType } = req.params;
       const templates = await storage.getTemplatesByTrade(tradeType);
-      
+
       res.json({
         tradeType,
         templates,
@@ -1237,7 +1237,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       }
 
       const subscriptions = await storage.getCompanySubscriptions(companyId);
-      
+
       res.json({
         companyId,
         subscriptions,
@@ -1262,7 +1262,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       }
 
       const updates = await storage.getUpdatesForCompany(companyId);
-      
+
       res.json({
         companyId,
         updates,
@@ -1320,7 +1320,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       }
 
       const templates = await storage.getMasterCompanyTemplates(masterCompanyId);
-      
+
       res.json({
         masterCompanyId,
         templates,
@@ -1351,7 +1351,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
 
       // Get subscriber count for notification
       const subscribers = await storage.getMasterCompanySubscribers(masterCompanyId);
-      
+
       res.json({
         update,
         subscriberCount: subscribers.length,
@@ -1367,18 +1367,18 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const company = await storage.getCompany(companyId);
       if (!company) {
         return res.status(404).json({ message: "Company not found" });
       }
-      
+
       res.json(company);
     } catch (error) {
       console.error("Error fetching company:", error);
@@ -1391,13 +1391,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const metrics = await storage.getComplianceMetrics(companyId);
       res.json(metrics);
     } catch (error) {
@@ -1411,18 +1411,18 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const validatedData = insertCSCSCardSchema.parse({
         ...req.body,
         companyId,
       });
-      
+
       const card = await storage.createCSCSCard(validatedData);
       res.json(card);
     } catch (error) {
@@ -1435,13 +1435,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const cards = await storage.getCSCSCards(companyId);
       res.json(cards);
     } catch (error) {
@@ -1455,19 +1455,19 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role || !["admin", "manager", "team_leader"].includes(role)) {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
-      
+
       const validatedData = insertRiskAssessmentSchema.parse({
         ...req.body,
         companyId,
         assessorId: userId,
       });
-      
+
       const assessment = await storage.createRiskAssessment(validatedData);
       res.json(assessment);
     } catch (error) {
@@ -1480,13 +1480,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const assessments = await storage.getRiskAssessments(companyId);
       res.json(assessments);
     } catch (error) {
@@ -1500,19 +1500,19 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role || !["admin", "manager", "team_leader"].includes(role)) {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
-      
+
       const validatedData = insertMethodStatementSchema.parse({
         ...req.body,
         companyId,
         authorizedBy: userId,
       });
-      
+
       const statement = await storage.createMethodStatement(validatedData);
       res.json(statement);
     } catch (error) {
@@ -1525,13 +1525,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const statements = await storage.getMethodStatements(companyId);
       res.json(statements);
     } catch (error) {
@@ -1545,19 +1545,19 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role || !["admin", "manager", "team_leader"].includes(role)) {
         return res.status(403).json({ message: "Insufficient permissions" });
       }
-      
+
       const validatedData = insertToolboxTalkSchema.parse({
         ...req.body,
         companyId,
         conductedBy: userId,
       });
-      
+
       const talk = await storage.createToolboxTalk(validatedData);
       res.json(talk);
     } catch (error) {
@@ -1570,13 +1570,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const talks = await storage.getToolboxTalks(companyId);
       res.json(talks);
     } catch (error) {
@@ -1590,13 +1590,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const items = await storage.getComplianceItems(companyId);
       res.json(items);
     } catch (error) {
@@ -1609,13 +1609,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const items = await storage.getOverdueComplianceItems(companyId);
       res.json(items);
     } catch (error) {
@@ -1629,7 +1629,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has admin role for this company
       const userRole = await storage.getUserRole(userId, companyId);
       if (userRole !== 'admin') {
@@ -1655,11 +1655,31 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     }
   });
 
+  // Finalize checkout session (idempotent) - used when redirecting back from Stripe Checkout
+  app.post('/api/payments/finalize', async (req: any, res) => {
+    try {
+      const { session_id } = req.body;
+      if (!session_id) return res.status(400).json({ error: 'session_id is required' });
+
+      const { finalizeCheckoutSession } = await import('./services/stripeFinalizeService');
+      const result = await finalizeCheckoutSession(session_id);
+
+      if (!result.success) {
+        return res.status(400).json({ success: false, message: result.message });
+      }
+
+      res.json({ success: true, message: result.message, companyId: result.companyId });
+    } catch (error) {
+      console.error('Error finalizing payment:', error);
+      res.status(500).json({ success: false, message: 'Failed to finalize payment' });
+    }
+  });
+
   app.get("/api/companies/:id/billing/history", requireAuth, async (req: any, res) => {
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has admin role for this company
       const userRole = await storage.getUserRole(userId, companyId);
       if (userRole !== 'admin') {
@@ -1697,7 +1717,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has admin role for this company
       const userRole = await storage.getUserRole(userId, companyId);
       if (userRole !== 'admin') {
@@ -1726,7 +1746,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(404).json({ message: "User not found in company" });
@@ -1744,7 +1764,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
       const { email, role } = req.body;
-      
+
       // Check if user has permission to invite users
       const userRole = await storage.getUserRole(userId, companyId);
       if (!userRole || !['admin', 'manager'].includes(userRole)) {
@@ -1752,10 +1772,10 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       }
 
       // In production: create invitation record and send email
-      res.json({ 
+      res.json({
         message: "Invitation sent successfully",
         email,
-        role 
+        role
       });
     } catch (error) {
       console.error("Error inviting user:", error);
@@ -1767,25 +1787,25 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
   app.post("/api/generate-document", requireAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { 
+      const {
         companyId,
-        templateType, 
-        siteName, 
-        siteAddress, 
-        projectManager, 
-        hazards, 
-        controlMeasures, 
+        templateType,
+        siteName,
+        siteAddress,
+        projectManager,
+        hazards,
+        controlMeasures,
         specialRequirements,
         isUrgent,
         tradeType
       } = req.body;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role || !["admin", "manager", "team_leader"].includes(role)) {
         return res.status(403).json({ message: "Insufficient permissions to generate documents" });
       }
-      
+
       // Get company details for AI context
       const company = await storage.getCompany(companyId);
       if (!company) {
@@ -1820,7 +1840,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
         generatedBy: userId,
         status: "generated"
       });
-      
+
       // Return document information
       res.json({
         id: document.id,
@@ -1842,13 +1862,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const documents = await storage.getGeneratedDocuments(companyId);
       res.json(documents);
     } catch (error) {
@@ -1866,11 +1886,11 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     console.log('Cookies:', req.headers.cookie);
     console.log('Origin:', req.headers.origin);
     console.log('Referer:', req.headers.referer);
-    
+
     // Set CORS headers for downloads
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    
+
     // DEVELOPMENT: Auto-authenticate David for ALL requests (authenticated or not)
     // This allows external browser access to work
     if (process.env.NODE_ENV === "development") {
@@ -1897,20 +1917,20 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       const documentId = parseInt(req.params.id);
       const format = req.params.format || 'pdf'; // Default to PDF
       const userId = req.user.id;
-      
+
       console.log(`Download request - Document ID: ${documentId}, Format: ${format}, User: ${userId}`);
-      
+
       // Check if user has access to this document
       const document = await storage.getGeneratedDocument(documentId);
       console.log(`Document lookup result:`, document ? `Found document: ${document.documentName}` : 'Document not found');
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       // Check company access - allow USER role to download
       const role = await storage.getUserRole(userId, document.companyId);
       console.log('User role for document download:', role, 'Company ID:', document.companyId);
-      
+
       console.log('Role check result:', role);
       // Allow download if user is authenticated and has any role
       if (!role) {
@@ -1922,7 +1942,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       if (!company) {
         return res.status(404).json({ message: "Company not found" });
       }
-      
+
       // Prepare export options
       const exportOptions = {
         title: document.documentName,
@@ -1934,32 +1954,32 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
         generatedDate: document.createdAt ? new Date(document.createdAt).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
         templateType: document.templateType
       };
-      
+
       if (format.toLowerCase() === 'word' || format.toLowerCase() === 'docx') {
         // Generate Word document
         const { generateWord } = await import('./documentExport');
         const wordBuffer = await generateWord(exportOptions);
-        
+
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
         res.setHeader('Content-Disposition', `attachment; filename="${document.documentName.replace(/[^a-zA-Z0-9]/g, '_')}.docx"`);
         res.send(wordBuffer);
-        
+
       } else {
         // Generate PDF document (default)
         console.log('Generating PDF for document:', document.id);
         console.log('PDF export options:', JSON.stringify(exportOptions, null, 2));
-        
+
         try {
           const { generatePDF } = await import('./documentExport');
           console.log('PDF module imported successfully');
-          
+
           const pdfBuffer = await generatePDF(exportOptions);
           console.log('PDF generated successfully, buffer size:', pdfBuffer.length);
-          
+
           if (!pdfBuffer || pdfBuffer.length === 0) {
             throw new Error('PDF buffer is empty or null');
           }
-          
+
           res.setHeader('Content-Type', 'application/pdf');
           res.setHeader('Content-Disposition', `attachment; filename="${document.documentName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf"`);
           res.setHeader('Content-Length', pdfBuffer.length.toString());
@@ -1972,7 +1992,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
           res.status(500).json({ message: `PDF generation failed: ${pdfError?.message || 'Unknown error'}` });
         }
       }
-      
+
     } catch (error: any) {
       console.error("Error downloading document:", error);
       console.error("Error stack:", error?.stack);
@@ -1985,13 +2005,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const documentId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this document
       const document = await storage.getGeneratedDocument(documentId);
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       // Check company access
       const role = await storage.getUserRole(userId, document.companyId);
       if (!role) {
@@ -2003,10 +2023,10 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       if (!company) {
         return res.status(404).json({ message: "Company not found" });
       }
-      
+
       // Generate formatted content for preview
       const formattedContent = generateDocumentContentForExport(document);
-      
+
       res.json({
         id: document.id,
         title: document.documentName,
@@ -2031,20 +2051,20 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      const { 
-        templateType, 
-        siteName, 
-        siteAddress, 
-        projectManager, 
-        hazards, 
-        controlMeasures, 
+      const {
+        templateType,
+        siteName,
+        siteAddress,
+        projectManager,
+        hazards,
+        controlMeasures,
         specialRequirements,
         customTradeDescription,
         customWorkActivities,
         customEquipment,
         customChallenges
       } = req.body;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
@@ -2216,7 +2236,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
         res.json(documentContent);
       } catch (error) {
         console.error("AI document generation failed:", error);
-        
+
         // Fallback to basic document creation without AI content
         const documentName = `${templateNames[templateType] || templateType} - ${siteName}`;
         const timestamp = new Date().toISOString().split('T')[0];
@@ -2273,7 +2293,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.companyId);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
@@ -2287,7 +2307,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       }
 
       const uploadedFiles = req.files as Express.Multer.File[];
-      
+
       if (!uploadedFiles || uploadedFiles.length === 0) {
         return res.status(400).json({ message: "No files uploaded" });
       }
@@ -2351,7 +2371,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.companyId);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
@@ -2372,10 +2392,10 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     app.post('/api/dev/create-rob-account', async (req, res) => {
       try {
         const { createRobAndSonAccount, createSampleDocuments } = await import('./createPremiumAccount');
-        
+
         const result = await createRobAndSonAccount();
         await createSampleDocuments(result.company.id, result.user.id);
-        
+
         res.json({
           success: true,
           message: "Rob & Son premium account created successfully",
@@ -2388,11 +2408,11 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
             status: "active"
           }
         });
-        
+
       } catch (error) {
         console.error("Error creating Rob & Son account:", error);
-        res.status(500).json({ 
-          success: false, 
+        res.status(500).json({
+          success: false,
           message: "Failed to create premium account",
           error: (error as any)?.message || 'Unknown error'
         });
@@ -2404,7 +2424,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
   app.get("/api/documents/:filename", async (req, res) => {
     try {
       const filename = req.params.filename;
-      
+
       // In production, this would serve files from a proper file storage system
       // For now, we'll return a placeholder or redirect to the document content
       res.setHeader('Content-Type', 'text/plain');
@@ -2421,18 +2441,18 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       const companyId = parseInt(req.params.companyId);
       const documentId = parseInt(req.params.documentId);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const document = await storage.getGeneratedDocument(documentId);
       if (!document || document.companyId !== companyId) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       res.json({
         id: document.id,
         name: document.documentName,
@@ -2453,13 +2473,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const documents = await storage.getGeneratedDocuments(companyId);
       res.json(documents);
     } catch (error) {
@@ -2473,17 +2493,17 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const documents = await storage.getGeneratedDocuments(companyId);
       // Filter for template documents (ISO 9001 starter documents)
       const templateDocuments = documents.filter(doc => doc.isTemplate || doc.status === "template");
-      
+
       res.json(templateDocuments);
     } catch (error) {
       console.error("Error fetching document library:", error);
@@ -2496,7 +2516,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has admin role for this company
       const userRole = await storage.getUserRole(userId, companyId);
       if (userRole !== 'admin') {
@@ -2516,9 +2536,9 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
         userId
       );
 
-      res.json({ 
-        success: true, 
-        message: "Company upgraded to Professional plan. ISO 9001 documents have been added to your library." 
+      res.json({
+        success: true,
+        message: "Company upgraded to Professional plan. ISO 9001 documents have been added to your library."
       });
     } catch (error) {
       console.error("Error upgrading plan:", error);
@@ -2531,19 +2551,19 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const documentId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has access to this document
       const document = await storage.getGeneratedDocument(documentId);
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       // Check company access
       const role = await storage.getUserRole(userId, document.companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const annotations = await storage.getDocumentAnnotations(documentId);
       res.json(annotations);
     } catch (error) {
@@ -2556,18 +2576,18 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const documentId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check document access
       const document = await storage.getGeneratedDocument(documentId);
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       const role = await storage.getUserRole(userId, document.companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const annotation = await storage.createDocumentAnnotation({
         documentId,
         userId,
@@ -2577,7 +2597,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
         priority: req.body.priority || "normal",
         parentId: req.body.parentId || null,
       });
-      
+
       res.status(201).json(annotation);
     } catch (error) {
       console.error("Error creating annotation:", error);
@@ -2589,18 +2609,18 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const documentId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check document access
       const document = await storage.getGeneratedDocument(documentId);
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       const role = await storage.getUserRole(userId, document.companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const reviews = await storage.getDocumentReviews(documentId);
       res.json(reviews);
     } catch (error) {
@@ -2613,18 +2633,18 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const documentId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check document access
       const document = await storage.getGeneratedDocument(documentId);
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       const role = await storage.getUserRole(userId, document.companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       const review = await storage.createDocumentReview({
         documentId,
         reviewerId: userId,
@@ -2633,14 +2653,14 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
         comments: req.body.comments,
         completedAt: new Date(),
       });
-      
+
       // Update document review status if this is an approval/rejection
       if (req.body.status === "approved") {
         await storage.updateDocumentReviewStatus(documentId, "approved", userId);
       } else if (req.body.status === "rejected") {
         await storage.updateDocumentReviewStatus(documentId, "rejected", userId);
       }
-      
+
       res.status(201).json(review);
     } catch (error) {
       console.error("Error creating review:", error);
@@ -2652,7 +2672,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const annotationId = parseInt(req.params.id);
       const { status } = req.body;
-      
+
       const annotation = await storage.updateAnnotationStatus(annotationId, status);
       res.json(annotation);
     } catch (error) {
@@ -2711,7 +2731,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const { companyId, documentId } = req.params;
       const { completionPercentage, workflowNotes } = req.body;
-      
+
       await storage.updateDocumentProgress(parseInt(documentId), completionPercentage, workflowNotes);
       res.json({ success: true });
     } catch (error) {
@@ -2724,7 +2744,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const { companyId, documentId } = req.params;
       const { notificationType } = req.body;
-      
+
       const success = await storage.sendDocumentNotification(parseInt(documentId), parseInt(companyId), notificationType);
       res.json({ success });
     } catch (error) {
@@ -2738,13 +2758,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Get the user to check if they're admin
       const user = await storage.getUser(userId);
       if (!user || user.email !== 'admin@workdoc360.com') {
         return res.status(403).json({ message: "Admin access required" });
       }
-      
+
       // Check if user has admin role for this company or is system admin
       const userRole = await storage.getUserRole(userId, companyId);
       if (userRole !== 'admin' && user.email !== 'admin@workdoc360.com') {
@@ -2753,14 +2773,14 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
 
       // In production, this would cascade delete all related data
       // For demo purposes, we'll just mark as deleted or remove
-      
+
       // Note: This is a demo feature - in production you'd want more sophisticated
       // soft deletion and data archiving
       console.log(`Demo: Deleting company ${companyId} by admin user ${userId}`);
-      
-      res.json({ 
-        success: true, 
-        message: "Company deleted successfully (demo mode)" 
+
+      res.json({
+        success: true,
+        message: "Company deleted successfully (demo mode)"
       });
     } catch (error) {
       console.error("Error deleting company:", error);
@@ -2773,23 +2793,23 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
     try {
       const { generateDocument } = await import("./documentGenerator");
       console.log('Demo generation request body:', JSON.stringify(req.body, null, 2));
-      
+
       // Frontend sends: { trade, documentType, contactDetails: { email, companyName }, answers }
       const { trade, documentType, contactDetails, answers } = req.body;
-      
+
       // Map to expected parameters and normalize template type
       const templateTypeMap: { [key: string]: string } = {
         'risk-assessment': 'risk_assessment',
-        'method-statement': 'method_statement', 
+        'method-statement': 'method_statement',
         'toolbox-talk': 'toolbox_talk'
       };
-      
+
       const templateType = templateTypeMap[documentType] || documentType;
       const tradeType = trade;
       const companyName = contactDetails?.companyName || 'Demo Company';
-      
+
       console.log('Mapped templateType:', templateType);
-      
+
       // Predefined demo site information for each company
       const demoSiteData = {
         "Premier Scaffolding Ltd": {
@@ -2798,13 +2818,13 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
           projectManager: "David Thompson"
         },
         "Elite Plastering Services": {
-          siteName: "Birmingham Residential Development", 
+          siteName: "Birmingham Residential Development",
           siteAddress: "456 Broad Street, Birmingham B15 3TR",
           projectManager: "Sarah Williams"
         },
         "Sparks Electrical Contractors": {
           siteName: "London Office Refurbishment",
-          siteAddress: "789 Borough High Street, London SE1 9GF", 
+          siteAddress: "789 Borough High Street, London SE1 9GF",
           projectManager: "Michael Chen"
         }
       };
@@ -2826,7 +2846,7 @@ Focus on UK construction industry standards, HSE requirements, and relevant cert
       };
 
       const document = await generateDocument(documentParams);
-      
+
       // Add multiple security layers to demo content
       const lines = document.content.split('\n');
       const watermarkedLines = lines.map((line, index) => {
@@ -2864,8 +2884,8 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       });
     } catch (error) {
       console.error("Demo document generation error:", error);
-      res.status(500).json({ 
-        error: "Failed to generate demo document", 
+      res.status(500).json({
+        error: "Failed to generate demo document",
         message: (error as any)?.message || 'Unknown error'
       });
     }
@@ -2878,31 +2898,31 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       const documentId = parseInt(req.params.documentId);
       const userId = req.user.id;
       const { format } = req.body; // 'pdf' or 'word'
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       // Get user subscription status
       const user = await storage.getUser(userId);
       if (!user || user.planStatus === 'pending_payment') {
         return res.status(402).json({ message: "Subscription required for document export" });
       }
-      
+
       const document = await storage.getGeneratedDocument(documentId);
       if (!document || document.companyId !== companyId) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       const company = await storage.getCompany(companyId);
       if (!company) {
         return res.status(404).json({ message: "Company not found" });
       }
-      
+
       const { generatePDF, generateWord } = await import('./documentExport');
-      
+
       const exportOptions = {
         title: document.documentName,
         content: generateDocumentContentForExport(document),
@@ -2912,11 +2932,11 @@ To generate, save, and download real documents, subscribe at workdoc360.com
         generatedDate: document.createdAt ? new Date(document.createdAt).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
         templateType: document.templateType
       };
-      
+
       let buffer: Buffer;
       let contentType: string;
       let filename: string;
-      
+
       if (format === 'pdf') {
         buffer = await generatePDF(exportOptions);
         contentType = 'application/pdf';
@@ -2928,7 +2948,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       } else {
         return res.status(400).json({ message: "Invalid format. Use 'pdf' or 'word'" });
       }
-      
+
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.send(buffer);
@@ -2944,31 +2964,31 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       const documentId = parseInt(req.params.documentId);
       const userId = req.user.id;
       const { recipientEmail, format } = req.body; // format: 'pdf' or 'word'
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
         return res.status(403).json({ message: "Access denied" });
       }
-      
+
       // Get user subscription status
       const user = await storage.getUser(userId);
       if (!user || user.planStatus === 'pending_payment') {
         return res.status(402).json({ message: "Subscription required for document emailing" });
       }
-      
+
       const document = await storage.getGeneratedDocument(documentId);
       if (!document || document.companyId !== companyId) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       const company = await storage.getCompany(companyId);
       if (!company) {
         return res.status(404).json({ message: "Company not found" });
       }
-      
+
       const { generatePDF, generateWord, emailDocument } = await import('./documentExport');
-      
+
       const exportOptions = {
         title: document.documentName,
         content: generateDocumentContentForExport(document),
@@ -2978,9 +2998,9 @@ To generate, save, and download real documents, subscribe at workdoc360.com
         generatedDate: document.createdAt ? new Date(document.createdAt).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB'),
         templateType: document.templateType
       };
-      
+
       let buffer: Buffer;
-      
+
       if (format === 'pdf') {
         buffer = await generatePDF(exportOptions);
       } else if (format === 'word') {
@@ -2988,7 +3008,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       } else {
         return res.status(400).json({ message: "Invalid format. Use 'pdf' or 'word'" });
       }
-      
+
       const emailSent = await emailDocument(
         recipientEmail,
         document.documentName,
@@ -2996,7 +3016,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
         format,
         company.name
       );
-      
+
       if (emailSent) {
         res.json({ message: "Document emailed successfully" });
       } else {
@@ -3012,16 +3032,16 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post("/api/verify-card-image", requireAuth, async (req: any, res) => {
     try {
       const { imageBase64 } = req.body;
-      
+
       if (!imageBase64) {
         return res.status(400).json({ error: "Image data required" });
       }
 
       // Remove data URL prefix if present
       const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
-      
+
       const verificationResult = await aiCardVerificationService.verifyCardWithAI(base64Data);
-      
+
       res.json(verificationResult);
     } catch (error: any) {
       console.error("AI card verification error:", error);
@@ -3033,13 +3053,13 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post("/api/check-cscs-register", requireAuth, async (req: any, res) => {
     try {
       const { cardNumber, holderName } = req.body;
-      
+
       if (!cardNumber) {
         return res.status(400).json({ error: "Card number required" });
       }
 
       const verification = await cscsVerificationService.verifyCSCSCard(cardNumber, holderName);
-      
+
       res.json(verification);
     } catch (error: any) {
       console.error("CSCS register check error:", error);
@@ -3066,21 +3086,21 @@ To generate, save, and download real documents, subscribe at workdoc360.com
 
       // Import RPA service dynamically
       const { cscsRpaService } = await import('./services/cscsRpaService');
-      
+
       // Perform RPA verification
       const rpaResult = await cscsRpaService.verifyCSCSCardRPA(cardNumber, scheme || 'CSCS');
-      
+
       // Save cardholder photo if available
       let savedPhotoUrl: string | null = null;
       if (rpaResult.holderPhotoBase64) {
         savedPhotoUrl = await cscsRpaService.saveCardholderPhoto(
-          cardNumber, 
-          companyId, 
+          cardNumber,
+          companyId,
           rpaResult.holderPhotoBase64
         );
         console.log('Saved cardholder photo:', savedPhotoUrl || 'Failed to save');
       }
-      
+
       // Log verification for audit trail
       console.log(`CSCS RPA Verification - Company ${companyId}:`, {
         cardNumber: rpaResult.cardNumber,
@@ -3100,7 +3120,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
 
     } catch (error: any) {
       console.error('CSCS RPA verification error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'RPA verification failed',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -3111,28 +3131,28 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post('/api/test-rpa-verify', async (req, res) => {
     try {
       const { cardNumber, scheme = 'CSCS' } = req.body;
-      
+
       if (!cardNumber) {
         return res.status(400).json({ error: 'Card number required' });
       }
 
       // Import RPA service dynamically
       const { cscsRpaService } = await import('./services/cscsRpaService');
-      
+
       // Perform RPA verification
       const rpaResult = await cscsRpaService.verifyCSCSCardRPA(cardNumber, scheme);
-      
+
       // Save cardholder photo if available (use demo company)
       let savedPhotoUrl: string | null = null;
       if (rpaResult.holderPhotoBase64) {
         savedPhotoUrl = await cscsRpaService.saveCardholderPhoto(
-          cardNumber, 
-          'demo-company', 
+          cardNumber,
+          'demo-company',
           rpaResult.holderPhotoBase64
         );
         console.log('Saved cardholder photo:', savedPhotoUrl || 'Failed to save');
       }
-      
+
       // Log verification for audit trail
       console.log(`CSCS RPA Test Verification:`, {
         cardNumber: rpaResult.cardNumber,
@@ -3151,7 +3171,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       res.json(response);
     } catch (error) {
       console.error('RPA test verification error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'RPA verification failed',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -3177,10 +3197,10 @@ To generate, save, and download real documents, subscribe at workdoc360.com
 
       // Import RPA service dynamically
       const { cscsRpaService } = await import('./services/cscsRpaService');
-      
+
       // Perform batch RPA verification
       const batchResults = await cscsRpaService.verifyMultipleCards(cardNumbers, scheme || 'CSCS');
-      
+
       // Log batch verification
       console.log(`CSCS Batch RPA Verification - Company ${companyId}:`, {
         totalCards: cardNumbers.length,
@@ -3199,7 +3219,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
 
     } catch (error: any) {
       console.error('CSCS Batch RPA verification error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Batch RPA verification failed',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -3211,7 +3231,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
     try {
       const { cscsRpaService } = await import('./services/cscsRpaService');
       const isConnected = await cscsRpaService.testRPAConnection();
-      
+
       res.json({
         connected: isConnected,
         timestamp: new Date().toISOString(),
@@ -3284,7 +3304,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
 
     } catch (error: any) {
       console.error('CSCS online verification error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Online verification failed',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -3328,7 +3348,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       const currentDate = new Date();
       const expiryDate = new Date(mockAnalysisResult.expiryDate);
       const daysDifference = Math.ceil((expiryDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
-      
+
       let status: 'valid' | 'expired' | 'revoked' | 'invalid' = 'valid';
       if (daysDifference < 0) {
         status = 'expired';
@@ -3359,7 +3379,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
 
     } catch (error: any) {
       console.error('CSCS image verification error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Image verification failed',
         details: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -3370,7 +3390,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post("/api/assess-card-fraud", requireAuth, async (req: any, res) => {
     try {
       const { imageBase64 } = req.body;
-      
+
       if (!imageBase64) {
         return res.status(400).json({ error: "Image data required" });
       }
@@ -3378,7 +3398,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
       const imageAnalysis = await aiCardVerificationService.analyseCardImage(base64Data);
       const fraudAssessment = aiCardVerificationService.generateFraudAssessment(imageAnalysis);
-      
+
       res.json({
         imageAnalysis,
         fraudAssessment
@@ -3394,7 +3414,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
     try {
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
-      
+
       // Check if user has admin access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role || role !== "admin") {
@@ -3407,7 +3427,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
 
       // Create public URL for the uploaded logo
       const logoUrl = `/uploaded_assets/${req.file.filename}`;
-      
+
       // Update company with new logo URL
       const updatedCompany = await storage.updateCompany(companyId, {
         logoUrl
@@ -3430,7 +3450,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
       const { documentType, title, description } = req.body;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
@@ -3442,11 +3462,11 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       }
 
       const uploadedDocuments = [];
-      
+
       // Process each uploaded file
       for (const file of req.files) {
         const fileUrl = `/uploaded_assets/${file.filename}`;
-        
+
         const documentData = {
           companyId,
           templateType: documentType,
@@ -3484,7 +3504,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       const companyId = parseInt(req.params.id);
       const userId = req.user.id;
       const { suiteId, companyName, tradeType } = req.body;
-      
+
       // Check if user has access to this company
       const role = await storage.getUserRole(userId, companyId);
       if (!role) {
@@ -3498,17 +3518,17 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       }
 
       let generatedDocuments: any[] = [];
-      
+
       // Generate documents based on suite type
       switch (suiteId) {
         case 'essential-compliance':
           generatedDocuments = await storage.createBasicStarterDocumentsForCompany(
-            companyId, 
-            tradeType, 
+            companyId,
+            tradeType,
             userId
           );
           break;
-          
+
         case 'trade-specialist':
           // Generate trade-specific documents
           if (tradeType === 'scaffolding') {
@@ -3517,7 +3537,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
               { templateType: 'working-at-height-risk', name: 'Working at Height Risk Assessment' },
               { templateType: 'scaffold-erection-method', name: 'Scaffold Erection Method Statement' }
             ];
-            
+
             for (const doc of scaffoldDocs) {
               const docData = {
                 companyId,
@@ -3534,17 +3554,17 @@ To generate, save, and download real documents, subscribe at workdoc360.com
                 fileUrl: `/api/documents/${doc.templateType}-${companyId}-${Date.now()}.pdf`,
                 generatedBy: userId,
               };
-              
+
               const generatedDoc = await storage.createGeneratedDocument(docData);
               generatedDocuments.push(generatedDoc);
             }
           }
           break;
-          
+
         case 'iso-9001-complete':
           generatedDocuments = await storage.createPremiumStarterDocumentsForCompany(
-            companyId, 
-            tradeType, 
+            companyId,
+            tradeType,
             userId
           );
           break;
@@ -3565,14 +3585,14 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post("/api/validate-voucher", requireAuth, async (req: any, res) => {
     try {
       const { code, planType } = req.body;
-      
+
       if (!code || !planType) {
         return res.status(400).json({ message: "Voucher code and plan type are required" });
       }
 
       // Get voucher from database
       const voucher = await storage.getVoucherByCode(code.toUpperCase());
-      
+
       if (!voucher) {
         return res.status(400).json({ message: "Invalid voucher code" });
       }
@@ -3595,8 +3615,8 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       // Check if voucher applies to this plan
       if (voucher.applicablePlans && voucher.applicablePlans.length > 0) {
         if (!voucher.applicablePlans.includes(planType)) {
-          return res.status(400).json({ 
-            message: `This voucher is not valid for the ${planType} plan` 
+          return res.status(400).json({
+            message: `This voucher is not valid for the ${planType} plan`
           });
         }
       }
@@ -3693,7 +3713,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
       // Increment voucher usage count
       await storage.incrementVoucherUsage(voucher.id);
 
-      res.json({ 
+      res.json({
         success: true,
         message: "Account activated successfully with voucher",
         planStatus: 'active'
@@ -3753,16 +3773,16 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post("/api/analytics/track", async (req, res) => {
     try {
       const { event, properties } = req.body;
-      
+
       // Log analytics event (in production, send to analytics service)
       console.log(`📊 Analytics Event: ${event}`, properties);
-      
+
       // Store important conversion events in database
       if (["user_signup", "company_created", "document_generated", "payment_completed"].includes(event)) {
         // Store in analytics table for reporting
         // await storage.trackAnalyticsEvent(event, properties);
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error("Analytics tracking error:", error);
@@ -3774,17 +3794,17 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post("/api/email-capture", async (req, res) => {
     try {
       const { email, firstName, tradeType, source, capturedAt } = req.body;
-      
+
       if (!email || !firstName) {
         return res.status(400).json({ error: "Email and first name are required" });
       }
 
       // Store email capture (in production, integrate with email service)
       console.log(`📧 Email Capture: ${email} (${firstName}) - ${source}`);
-      
+
       // Add to email marketing system
       // await emailService.addToList(email, firstName, { tradeType, source });
-      
+
       res.json({ success: true, message: "Successfully subscribed" });
     } catch (error) {
       console.error("Email capture error:", error);
@@ -3795,14 +3815,14 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   // Admin endpoint to create voucher codes (for bypassing payments)
   app.post("/api/admin/create-voucher", async (req: any, res: any) => {
     try {
-      const { 
-        code, 
-        description, 
-        discountType = 'bypass_payment', 
+      const {
+        code,
+        description,
+        discountType = 'bypass_payment',
         discountValue = 0,
         maxUses = 1,
         validUntil,
-        applicablePlans 
+        applicablePlans
       } = req.body;
 
       if (!code) {
@@ -3844,7 +3864,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.get("/api/admin/voucher/:code", async (req: any, res: any) => {
     try {
       const voucher = await storage.getVoucherByCode(req.params.code.toUpperCase());
-      
+
       if (!voucher) {
         return res.status(404).json({ message: "Voucher not found" });
       }
@@ -3861,7 +3881,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post("/api/capture-exit-intent", async (req: any, res: any) => {
     try {
       const { email, source = 'exit_intent' } = req.body;
-      
+
       if (!email) {
         return res.status(400).json({ error: "Email is required" });
       }
@@ -3908,7 +3928,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
   app.post("/api/newsletter-signup", async (req: any, res: any) => {
     try {
       const { email, source = 'newsletter' } = req.body;
-      
+
       if (!email) {
         return res.status(400).json({ error: "Email is required" });
       }
@@ -3961,7 +3981,7 @@ To generate, save, and download real documents, subscribe at workdoc360.com
 function getTemplateDisplayName(templateType: string): string {
   const nameMap: Record<string, string> = {
     "risk-assessment": "Risk Assessment",
-    "method-statement": "Method Statement", 
+    "method-statement": "Method Statement",
     "toolbox-talk": "Toolbox Talk Template",
     "permit-to-work": "Permit to Work",
     "scaffold-inspection": "Scaffold Inspection Checklist",
@@ -4129,14 +4149,14 @@ Authorised by: Management`
 
   // Get company name for content generation
   const companyName = document.controlMeasures || 'PlasterMaster';
-  
+
   // Replace placeholders in template content with actual company name
   const content = templateContent[document.templateType];
   if (content) {
     return content.replace(/\$\{document\.companyName \|\| 'the Company'\}/g, companyName)
-                  .replace(/\$\{document\.companyName \|\| 'The Company'\}/g, companyName);
+      .replace(/\$\{document\.companyName \|\| 'The Company'\}/g, companyName);
   }
-  
+
   return document.controlMeasures || document.hazards || `
 Professional compliance document for ${document.companyName || 'Construction Company'}
 
@@ -4164,7 +4184,7 @@ For specific requirements and detailed procedures, please refer to the relevant 
 
 function generateDocumentContent(data: any): string {
   const { templateType, siteName, siteAddress, projectManager, tradeType } = data;
-  
+
   const baseContent = `
 # ${getTemplateDisplayName(templateType)}
 

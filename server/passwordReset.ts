@@ -41,13 +41,13 @@ export class PasswordResetService {
       expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour expiry
 
       // Delete any existing tokens for this user (using direct SQL for simplicity)
-      await db.execute(
+      await (db as any).execute(
         `DELETE FROM password_reset_tokens WHERE user_id = $1`,
         [user.id]
       );
 
       // Create new reset token (using direct SQL for simplicity)  
-      await db.execute(
+      await (db as any).execute(
         `INSERT INTO password_reset_tokens (user_id, token, expires_at, used) VALUES ($1, $2, $3, $4)`,
         [user.id, token, expiresAt, false]
       );
@@ -70,12 +70,12 @@ export class PasswordResetService {
   // Verify and use a reset token
   static async verifyResetToken(token: string): Promise<{ valid: boolean; userId?: string; message: string }> {
     try {
-      const result = await db.execute(
+      const result = await (db as any).execute(
         `SELECT id, user_id, token, expires_at, used FROM password_reset_tokens WHERE token = $1 LIMIT 1`,
         [token]
       );
-      
-      const resetToken = result.rows[0];
+
+      const resetToken: any = result && result.rows && result.rows[0];
 
       if (!resetToken) {
         return {
@@ -91,13 +91,14 @@ export class PasswordResetService {
         };
       }
 
-      if (new Date() > new Date(resetToken.expires_at)) {
+      const expiresAt = resetToken.expires_at ? new Date(resetToken.expires_at) : null;
+      if (expiresAt && new Date() > expiresAt) {
         // Clean up expired token
-        await db.execute(
+        await (db as any).execute(
           `DELETE FROM password_reset_tokens WHERE id = $1`,
           [resetToken.id]
         );
-        
+
         return {
           valid: false,
           message: "Password reset link has expired. Please request a new one."
@@ -106,7 +107,7 @@ export class PasswordResetService {
 
       return {
         valid: true,
-        userId: resetToken.user_id,
+        userId: typeof resetToken.user_id === 'string' ? resetToken.user_id : String(resetToken.user_id),
         message: "Token is valid."
       };
 
@@ -123,7 +124,7 @@ export class PasswordResetService {
   static async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
     try {
       const verification = await this.verifyResetToken(token);
-      
+
       if (!verification.valid || !verification.userId) {
         return {
           success: false,
@@ -142,13 +143,13 @@ export class PasswordResetService {
         .where(eq(users.id, verification.userId));
 
       // Mark token as used
-      await db.execute(
+      await (db as any).execute(
         `UPDATE password_reset_tokens SET used = true WHERE token = $1`,
         [token]
       );
 
       // Clean up all tokens for this user
-      await db.execute(
+      await (db as any).execute(
         `DELETE FROM password_reset_tokens WHERE user_id = $1`,
         [verification.userId]
       );
@@ -170,7 +171,7 @@ export class PasswordResetService {
   // Clean up expired tokens (can be run periodically)
   static async cleanupExpiredTokens(): Promise<void> {
     try {
-      await db.execute(
+      await (db as any).execute(
         `DELETE FROM password_reset_tokens WHERE expires_at < NOW()`
       );
     } catch (error) {
