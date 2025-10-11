@@ -4,3 +4,7 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+*.zip
+app-v*.zip
+_unzipped_*/
+*.log
