@@ -1,8 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
+let anthropicClient: any = null;
+if (hasAnthropicKey) {
+  anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+} else if (process.env.NODE_ENV !== 'production') {
+  console.warn('ANTHROPIC_API_KEY not set — AI document assessment disabled in dev mode.');
+}
 
 export interface DocumentAssessmentResult {
   overallScore: number; // 0-100
@@ -125,7 +129,7 @@ Provide a comprehensive assessment covering:
 Focus on practical, actionable improvements that will enhance compliance and safety outcomes.`;
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await anthropicClient.messages.create({
       model: 'claude-3-sonnet-20240229',
       max_tokens: 4000,
       temperature: 0.3,
@@ -240,7 +244,7 @@ Create a structured improvement plan with:
 Format as a professional business document.`;
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await anthropicClient.messages.create({
       model: 'claude-3-sonnet-20240229',
       max_tokens: 3000,
       temperature: 0.4,

@@ -1,0 +1,240 @@
+----------------------------------------
+/var/log/web.stdout.log
+----------------------------------------
+Sep  7 19:18:22 ip-172-31-21-172 web[11292]: }
+Sep  7 19:18:22 ip-172-31-21-172 web[11303]: > rest-express@1.0.0 start
+Sep  7 19:18:22 ip-172-31-21-172 web[11303]: > NODE_ENV=production ts-node index.ts
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]: Error: Cannot find module '/var/app/current/storage' imported from /var/app/current/routes.ts
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]: Did you mean to import "./storage.ts"?
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:    at moduleResolve (node:internal/modules/esm/resolve:859:10)
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12)
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:707:25)
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:    at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38)
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38)
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:    at ModuleJob._link (node:internal/modules/esm/module_job:183:49) {
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:  code: 'ERR_MODULE_NOT_FOUND',
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]:  url: 'file:///var/app/current/storage'
+Sep  7 19:18:23 ip-172-31-21-172 web[11317]: }
+Sep  7 19:32:03 ip-172-31-21-172 web[12344]: > rest-express@1.0.0 start
+Sep  7 19:32:03 ip-172-31-21-172 web[12344]: > NODE_ENV=production ts-node index.ts
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]: Error: Cannot find package '@shared/schema' imported from /var/app/current/routes.ts
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:255:9)
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at packageResolve (node:internal/modules/esm/resolve:767:81)
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at moduleResolve (node:internal/modules/esm/resolve:853:18)
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12)
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:707:25)
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38)
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38)
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:    at ModuleJob._link (node:internal/modules/esm/module_job:183:49) {
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]:  code: 'ERR_MODULE_NOT_FOUND'
+Sep  7 19:32:04 ip-172-31-21-172 web[12388]: }
+Sep  7 19:32:04 ip-172-31-21-172 web[12420]: > rest-express@1.0.0 start
+Sep  7 19:32:04 ip-172-31-21-172 web[12420]: > NODE_ENV=production ts-node index.ts
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]: Error: Cannot find package '@shared/schema' imported from /var/app/current/routes.ts
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:255:9)
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at packageResolve (node:internal/modules/esm/resolve:767:81)
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at moduleResolve (node:internal/modules/esm/resolve:853:18)
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12)
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:707:25)
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38)
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38)
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:    at ModuleJob._link (node:internal/modules/esm/module_job:183:49) {
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]:  code: 'ERR_MODULE_NOT_FOUND'
+Sep  7 19:32:05 ip-172-31-21-172 web[12434]: }
+Sep  7 19:32:06 ip-172-31-21-172 web[12442]: > rest-express@1.0.0 start
+Sep  7 19:32:06 ip-172-31-21-172 web[12442]: > NODE_ENV=production ts-node index.ts
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]: Error: Cannot find package '@shared/schema' imported from /var/app/current/routes.ts
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:255:9)
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at packageResolve (node:internal/modules/esm/resolve:767:81)
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at moduleResolve (node:internal/modules/esm/resolve:853:18)
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12)
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:707:25)
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38)
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38)
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:    at ModuleJob._link (node:internal/modules/esm/module_job:183:49) {
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]:  code: 'ERR_MODULE_NOT_FOUND'
+Sep  7 19:32:07 ip-172-31-21-172 web[12456]: }
+Sep  7 19:32:07 ip-172-31-21-172 web[12464]: > rest-express@1.0.0 start
+Sep  7 19:32:07 ip-172-31-21-172 web[12464]: > NODE_ENV=production ts-node index.ts
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]: Error: Cannot find package '@shared/schema' imported from /var/app/current/routes.ts
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:255:9)
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at packageResolve (node:internal/modules/esm/resolve:767:81)
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at moduleResolve (node:internal/modules/esm/resolve:853:18)
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12)
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:707:25)
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38)
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38)
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:    at ModuleJob._link (node:internal/modules/esm/module_job:183:49) {
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]:  code: 'ERR_MODULE_NOT_FOUND'
+Sep  7 19:32:08 ip-172-31-21-172 web[12478]: }
+Sep  7 19:32:09 ip-172-31-21-172 web[12487]: > rest-express@1.0.0 start
+Sep  7 19:32:09 ip-172-31-21-172 web[12487]: > NODE_ENV=production ts-node index.ts
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]: Error: Cannot find package '@shared/schema' imported from /var/app/current/routes.ts
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:255:9)
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at packageResolve (node:internal/modules/esm/resolve:767:81)
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at moduleResolve (node:internal/modules/esm/resolve:853:18)
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12)
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:707:25)
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38)
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38)
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:    at ModuleJob._link (node:internal/modules/esm/module_job:183:49) {
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]:  code: 'ERR_MODULE_NOT_FOUND'
+Sep  7 19:32:10 ip-172-31-21-172 web[12501]: }
+Sep  7 19:32:10 ip-172-31-21-172 web[12512]: > rest-express@1.0.0 start
+Sep  7 19:32:10 ip-172-31-21-172 web[12512]: > NODE_ENV=production ts-node index.ts
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]: Error: Cannot find package '@shared/schema' imported from /var/app/current/routes.ts
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:255:9)
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at packageResolve (node:internal/modules/esm/resolve:767:81)
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at moduleResolve (node:internal/modules/esm/resolve:853:18)
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:783:12)
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:707:25)
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at ModuleLoader.resolve (node:internal/modules/esm/loader:690:38)
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:307:38)
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:    at ModuleJob._link (node:internal/modules/esm/module_job:183:49) {
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]:  code: 'ERR_MODULE_NOT_FOUND'
+Sep  7 19:32:11 ip-172-31-21-172 web[12526]: }
+
+
+----------------------------------------
+/var/log/eb-engine.log
+----------------------------------------
+2025/09/07 19:32:00.503006 [WARN] stopProcess Warning: process xray is not registered 
+2025/09/07 19:32:00.503055 [INFO] Running command: systemctl stop xray.service
+2025/09/07 19:32:00.514190 [INFO] Executing instruction: stop proxy
+2025/09/07 19:32:00.514213 [INFO] Running command: systemctl show -p PartOf httpd.service
+2025/09/07 19:32:00.526049 [WARN] deregisterProcess Warning: process httpd is not registered, skipping...
+
+2025/09/07 19:32:00.526078 [INFO] Running command: systemctl show -p PartOf nginx.service
+2025/09/07 19:32:00.536938 [INFO] Running command: systemctl is-active nginx.service
+2025/09/07 19:32:00.543651 [INFO] Running command: systemctl show -p PartOf nginx.service
+2025/09/07 19:32:00.551889 [INFO] Running command: systemctl stop nginx.service
+2025/09/07 19:32:00.747397 [INFO] Running command: systemctl disable nginx.service
+2025/09/07 19:32:00.993579 [INFO] Running command: systemctl daemon-reload
+2025/09/07 19:32:01.242190 [INFO] Running command: systemctl reset-failed
+2025/09/07 19:32:01.250375 [INFO] Executing instruction: FlipApplication
+2025/09/07 19:32:01.250396 [INFO] Fetching environment variables...
+2025/09/07 19:32:01.250408 [INFO] setting default port 8080 to application
+2025/09/07 19:32:01.250684 [INFO] Purge old process...
+2025/09/07 19:32:01.250702 [INFO] Running command: systemctl stop eb-app.target
+2025/09/07 19:32:01.258553 [INFO] Running command: systemctl show -p ConsistsOf eb-app.target | cut -d= -f2
+2025/09/07 19:32:01.268355 [INFO] web.service
+
+2025/09/07 19:32:01.268376 [INFO] deregistering process: web
+2025/09/07 19:32:01.268385 [INFO] Running command: systemctl show -p PartOf web.service
+2025/09/07 19:32:01.278028 [INFO] Running command: systemctl is-active web.service
+2025/09/07 19:32:01.285482 [INFO] Running command: systemctl disable web.service
+2025/09/07 19:32:01.574398 [INFO] Removed "/etc/systemd/system/multi-user.target.wants/web.service".
+
+2025/09/07 19:32:01.574475 [INFO] Running command: systemctl daemon-reload
+2025/09/07 19:32:01.799821 [INFO] Running command: systemctl reset-failed
+2025/09/07 19:32:01.808564 [INFO] Running command: systemctl is-active web.service
+2025/09/07 19:32:01.815838 [INFO] Process web has been fully terminated
+2025/09/07 19:32:01.815857 [INFO] All processes have been fully terminated
+2025/09/07 19:32:01.815861 [INFO] Removing /var/app/current/ if it exists
+2025/09/07 19:32:01.848294 [INFO] Renaming /var/app/staging/ to /var/app/current/
+2025/09/07 19:32:01.848323 [INFO] Register application processes...
+2025/09/07 19:32:01.848327 [INFO] Registering the proc: web
+
+2025/09/07 19:32:01.848336 [INFO] Running command: systemctl show -p PartOf web.service
+2025/09/07 19:32:01.864309 [INFO] Running command: systemctl daemon-reload
+2025/09/07 19:32:02.153414 [INFO] Running command: systemctl reset-failed
+2025/09/07 19:32:02.161864 [INFO] Running command: systemctl is-enabled eb-app.target
+2025/09/07 19:32:02.169571 [INFO] Running command: systemctl enable eb-app.target
+2025/09/07 19:32:02.414368 [INFO] Running command: systemctl start eb-app.target
+2025/09/07 19:32:02.423094 [INFO] Running command: systemctl enable web.service
+2025/09/07 19:32:02.642782 [INFO] Created symlink /etc/systemd/system/multi-user.target.wants/web.service â†’ /etc/systemd/system/web.service.
+
+2025/09/07 19:32:02.642820 [INFO] Running command: systemctl show -p PartOf web.service
+2025/09/07 19:32:02.652454 [INFO] Running command: systemctl is-active web.service
+2025/09/07 19:32:02.659348 [INFO] Running command: systemctl start web.service
+2025/09/07 19:32:02.752490 [INFO] Executing instruction: start X-Ray
+2025/09/07 19:32:02.752519 [INFO] X-Ray is not enabled.
+2025/09/07 19:32:02.752524 [INFO] Executing instruction: start proxy with new configuration
+2025/09/07 19:32:02.752546 [INFO] Running command: /usr/sbin/nginx -t -c /var/proxy/staging/nginx/nginx.conf
+2025/09/07 19:32:02.778748 [INFO] nginx: [warn] could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+nginx: the configuration file /var/proxy/staging/nginx/nginx.conf syntax is ok
+nginx: configuration file /var/proxy/staging/nginx/nginx.conf test is successful
+
+2025/09/07 19:32:02.779043 [INFO] Running command: cp -rp /var/proxy/staging/nginx/* /etc/nginx
+2025/09/07 19:32:02.783507 [INFO] Running command: systemctl show -p PartOf nginx.service
+2025/09/07 19:32:02.807921 [INFO] Running command: systemctl daemon-reload
+2025/09/07 19:32:03.195354 [INFO] Running command: systemctl reset-failed
+2025/09/07 19:32:03.209215 [INFO] Running command: systemctl show -p PartOf nginx.service
+2025/09/07 19:32:03.229658 [INFO] Running command: systemctl is-active nginx.service
+2025/09/07 19:32:03.244533 [INFO] Running command: systemctl start nginx.service
+2025/09/07 19:32:03.395633 [INFO] Executing instruction: configureSqsd
+2025/09/07 19:32:03.395656 [INFO] This is a web server environment instance, skip configure sqsd daemon ...
+2025/09/07 19:32:03.395660 [INFO] Executing instruction: startSqsd
+2025/09/07 19:32:03.395662 [INFO] This is a web server environment instance, skip start sqsd daemon ...
+2025/09/07 19:32:03.395666 [INFO] Executing instruction: Track pids in healthd
+2025/09/07 19:32:03.395669 [INFO] This is an enhanced health env...
+2025/09/07 19:32:03.395681 [INFO] Running command: systemctl show -p ConsistsOf aws-eb.target | cut -d= -f2
+2025/09/07 19:32:03.412173 [INFO] healthd.service nginx.service cfn-hup.service
+
+2025/09/07 19:32:03.412205 [INFO] Running command: systemctl show -p ConsistsOf eb-app.target | cut -d= -f2
+2025/09/07 19:32:03.428489 [INFO] web.service
+
+2025/09/07 19:32:03.428729 [INFO] Executing instruction: RunAppDeployPostDeployHooks
+2025/09/07 19:32:03.428751 [INFO] Executing platform hooks in .platform/hooks/postdeploy/
+2025/09/07 19:32:03.428771 [INFO] The dir .platform/hooks/postdeploy/ does not exist
+2025/09/07 19:32:03.428775 [INFO] Finished running scripts in /var/app/current/.platform/hooks/postdeploy
+2025/09/07 19:32:03.428781 [INFO] Executing cleanup logic
+2025/09/07 19:32:03.428864 [INFO] CommandService Response: {"status":"SUCCESS","api_version":"1.0","results":[{"status":"SUCCESS","msg":"Engine execution has succeeded.","returncode":0,"events":[{"msg":"Instance deployment completed successfully.","timestamp":1757273523428,"severity":"INFO"}]}]}
+
+2025/09/07 19:32:03.430120 [INFO] Platform Engine finished execution on command: app-deploy
+
+2025/09/07 19:33:59.670709 [INFO] Starting...
+2025/09/07 19:33:59.670756 [INFO] Starting EBPlatform-PlatformEngine
+2025/09/07 19:33:59.670776 [INFO] reading event message file
+2025/09/07 19:33:59.671081 [INFO] Engine received EB command cfn-hup-exec
+
+2025/09/07 19:33:59.739696 [INFO] Running command: /opt/aws/bin/cfn-get-metadata -s arn:aws:cloudformation:eu-north-1:596797809171:stack/awseb-e-murjzridyp-stack/83fcc750-8c02-11f0-8507-0ea921173f63 -r AWSEBAutoScalingGroup --region eu-north-1
+2025/09/07 19:34:00.092107 [INFO] Running command: /opt/aws/bin/cfn-get-metadata -s arn:aws:cloudformation:eu-north-1:596797809171:stack/awseb-e-murjzridyp-stack/83fcc750-8c02-11f0-8507-0ea921173f63 -r AWSEBBeanstalkMetadata --region eu-north-1
+2025/09/07 19:34:00.390426 [INFO] checking whether command tail-log is applicable to this instance...
+2025/09/07 19:34:00.390439 [INFO] this command is applicable to the instance, thus instance should execute command
+2025/09/07 19:34:00.390442 [INFO] Engine command: (tail-log)
+
+2025/09/07 19:34:00.390481 [INFO] Executing instruction: GetTailLogs
+2025/09/07 19:34:00.390483 [INFO] Tail Logs...
+2025/09/07 19:34:00.390799 [INFO] Running command: tail -n 100 /var/log/web.stdout.log
+2025/09/07 19:34:00.393034 [INFO] Running command: tail -n 100 /var/log/eb-engine.log
+
+
+----------------------------------------
+/var/log/eb-hooks.log
+----------------------------------------
+
+
+----------------------------------------
+/var/log/nginx/access.log
+----------------------------------------
+181.118.159.182 - - [07/Sep/2025:18:52:21 +0000] "GET / HTTP/1.1" 502 150 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" "-"
+45.156.87.179 - - [07/Sep/2025:19:25:44 +0000] "GET / HTTP/1.1" 502 150 "-" "-" "-"
+
+
+----------------------------------------
+/var/log/nginx/error.log
+----------------------------------------
+2025/09/07 18:35:11 [warn] 8165#8165: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 18:35:11 [warn] 8215#8215: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 18:35:11 [warn] 8216#8216: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 18:52:21 [error] 8221#8221: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 181.118.159.182, server: , request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:8080/", host: "184.84.49.13:80"
+2025/09/07 19:01:18 [warn] 9861#9861: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 19:01:19 [warn] 9904#9904: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 19:01:19 [warn] 9905#9905: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 19:18:15 [warn] 11138#11138: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 19:18:15 [warn] 11187#11187: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 19:18:15 [warn] 11189#11189: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 19:25:44 [error] 11191#11191: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 45.156.87.179, server: , request: "GET / HTTP/1.1", upstream: "http://127.0.0.1:8080/", host: "13.49.84.184:80"
+2025/09/07 19:32:02 [warn] 12348#12348: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 19:32:03 [warn] 12397#12397: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+2025/09/07 19:32:03 [warn] 12399#12399: could not build optimal types_hash, you should increase either types_hash_max_size: 1024 or types_hash_bucket_size: 64; ignoring types_hash_bucket_size
+

@@ -41,7 +41,7 @@ export class CloudflareDomainManager implements DomainProvider {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         console.log(`✅ Created subdomain: ${subdomain}.${this.baseDomain}`);
         return true;
@@ -71,10 +71,10 @@ export class CloudflareDomainManager implements DomainProvider {
       );
 
       const listResult = await listResponse.json();
-      
+
       if (listResult.success && listResult.result.length > 0) {
         const recordId = listResult.result[0].id;
-        
+
         // Delete the DNS record
         const deleteResponse = await fetch(
           `https://api.cloudflare.com/client/v4/zones/${this.zoneId}/dns_records/${recordId}`,
@@ -90,7 +90,7 @@ export class CloudflareDomainManager implements DomainProvider {
         const deleteResult = await deleteResponse.json();
         return deleteResult.success;
       }
-      
+
       return false;
     } catch (error) {
       console.error('❌ Domain deletion error:', error);
@@ -102,14 +102,14 @@ export class CloudflareDomainManager implements DomainProvider {
     // Check if subdomain is valid format
     const subdomainRegex = /^[a-z0-9-]+$/;
     if (!subdomainRegex.test(subdomain)) return false;
-    
+
     // Check length constraints
     if (subdomain.length < 3 || subdomain.length > 30) return false;
-    
+
     // Check for reserved words
     const reserved = ['www', 'api', 'admin', 'mail', 'ftp', 'support', 'help'];
     if (reserved.includes(subdomain)) return false;
-    
+
     return true;
   }
 }
@@ -119,20 +119,35 @@ export class GoDaddyDomainManager implements DomainProvider {
   private apiKey: string;
   private apiSecret: string;
   private baseDomain: string;
+  private configured: boolean = false;
 
   constructor() {
     this.apiKey = process.env.GODADDY_API_KEY || '';
     this.apiSecret = process.env.GODADDY_API_SECRET || '';
     this.baseDomain = 'workdoc360.com';
-    
+
+    // In production we expect credentials. In development, allow missing creds but
+    // mark the manager as not configured so methods become safe no-ops.
     if (!this.apiKey || !this.apiSecret) {
-      throw new Error('GoDaddy API credentials not found. Please add GODADDY_API_KEY and GODADDY_API_SECRET to environment variables.');
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('GoDaddy API credentials not found. Please add GODADDY_API_KEY and GODADDY_API_SECRET to environment variables.');
+      }
+
+      console.warn('⚠️ GoDaddy API credentials not found. Running in development mode — GoDaddy domain actions will be no-ops.');
+      this.configured = false;
+      return;
     }
-    
+
+    this.configured = true;
     console.log('✅ GoDaddy API credentials loaded successfully');
   }
 
   async testConnection(): Promise<boolean> {
+    if (!this.configured) {
+      console.warn('GoDaddy testConnection skipped: manager not configured');
+      return false;
+    }
+
     try {
       const response = await fetch('https://api.godaddy.com/v1/domains', {
         method: 'GET',
@@ -141,7 +156,7 @@ export class GoDaddyDomainManager implements DomainProvider {
           'Content-Type': 'application/json',
         }
       });
-      
+
       console.log('GoDaddy API test response status:', response.status);
       return response.ok;
     } catch (error) {
@@ -151,6 +166,10 @@ export class GoDaddyDomainManager implements DomainProvider {
   }
 
   async createSubdomain(subdomain: string): Promise<boolean> {
+    if (!this.configured) {
+      console.warn(`GoDaddy createSubdomain skipped for ${subdomain}: manager not configured`);
+      return false;
+    }
 
     try {
       const response = await fetch(
@@ -182,7 +201,10 @@ export class GoDaddyDomainManager implements DomainProvider {
   }
 
   async deleteSubdomain(subdomain: string): Promise<boolean> {
-    if (!this.apiKey || !this.apiSecret) return false;
+    if (!this.configured) {
+      console.warn(`GoDaddy deleteSubdomain skipped for ${subdomain}: manager not configured`);
+      return false;
+    }
 
     try {
       const response = await fetch(
@@ -212,10 +234,25 @@ export class GoDaddyDomainManager implements DomainProvider {
 // Domain manager factory
 export function createDomainManager(): DomainProvider {
   const provider = process.env.DNS_PROVIDER || 'cloudflare';
-  
   switch (provider) {
-    case 'godaddy':
-      return new GoDaddyDomainManager();
+    case 'godaddy': {
+      try {
+        const gd = new GoDaddyDomainManager();
+
+        // If the manager is not configured (no creds) and we're in dev, fall back to Cloudflare
+        // so automated flows continue to work locally.
+        // @ts-ignore - configured is an internal flag
+        if (!gd.configured && process.env.NODE_ENV !== 'production') {
+          console.warn('Falling back to CloudflareDomainManager because GoDaddy is not configured');
+          return new CloudflareDomainManager();
+        }
+
+        return gd;
+      } catch (err) {
+        console.warn('Failed to initialize GoDaddyDomainManager, falling back to Cloudflare:', err);
+        return new CloudflareDomainManager();
+      }
+    }
     case 'cloudflare':
     default:
       return new CloudflareDomainManager();
@@ -253,16 +290,16 @@ export class AutomatedSubdomainService {
       if (!existingCompany) {
         // Try to create DNS record
         const dnsCreated = await this.domainManager.createSubdomain(slug);
-        
+
         if (dnsCreated) {
           // Update company with slug
           await storage.updateCompany(companyId, { companySlug: slug });
-          
+
           console.log(`✅ Company ${companyName} now available at: ${slug}.workdoc360.co.uk`);
           return slug;
         }
       }
-      
+
       attempt++;
     }
 
@@ -273,11 +310,11 @@ export class AutomatedSubdomainService {
   async deleteCompanySubdomain(companySlug: string): Promise<boolean> {
     try {
       const success = await this.domainManager.deleteSubdomain(companySlug);
-      
+
       if (success) {
         console.log(`✅ Deleted subdomain: ${companySlug}.workdoc360.co.uk`);
       }
-      
+
       return success;
     } catch (error) {
       console.error(`❌ Failed to delete subdomain ${companySlug}:`, error);

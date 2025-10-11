@@ -1,10 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { CSCSVerificationResult } from './cscsVerification';
 
-// AI-powered CSCS card verification using image analysis
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
+let anthropicClient: any = null;
+if (hasAnthropicKey) {
+  anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+} else if (process.env.NODE_ENV !== 'production') {
+  console.warn('ANTHROPIC_API_KEY not set — AI card verification disabled in dev mode.');
+}
 
 export interface CardImageAnalysis {
   cardNumber: string | null;
@@ -40,7 +43,28 @@ export class AICardVerificationService {
    */
   async analyseCardImage(imageBase64: string): Promise<CardImageAnalysis> {
     try {
-      const response = await anthropic.messages.create({
+      if (!anthropicClient) {
+        // Dev fallback: return a conservative empty analysis
+        return {
+          cardNumber: null,
+          holderName: null,
+          cardType: null,
+          expiryDate: null,
+          issueDate: null,
+          cardColour: null,
+          securityFeatures: {
+            hologramPresent: false,
+            correctFont: false,
+            properLayout: false,
+            validQRCode: null
+          },
+          qualityScore: 0,
+          fraudIndicators: ['AI disabled in dev'],
+          extractedText: ''
+        };
+      }
+
+      const response = await anthropicClient.messages.create({
         model: "claude-sonnet-4-20250514",
         max_tokens: 2000,
         messages: [{

@@ -10,7 +10,7 @@ import connectPg from "connect-pg-simple";
 
 declare global {
   namespace Express {
-    interface User extends SelectUser {}
+    interface User extends SelectUser { }
   }
 }
 
@@ -32,8 +32,18 @@ export async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
+
+  // Ensure SSL for Postgres in production-like environments.
+  // Many managed Postgres providers (Neon, RDS) require sslmode=require.
+  const rawConn = process.env.DATABASE_URL || "";
+  const ensureSslMode = (url: string) => {
+    if (!url) return url;
+    if (url.includes("sslmode=")) return url;
+    return url.includes("?") ? `${url}&sslmode=require` : `${url}?sslmode=require`;
+  };
+  const connString = ensureSslMode(rawConn);
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    conString: connString,
     createTableIfMissing: true,
     ttl: sessionTtl,
     tableName: "sessions",
@@ -108,7 +118,7 @@ export function setupAuth(app: Express) {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(409).json({ 
+        return res.status(409).json({
           error: "Account already exists",
           message: "You already have an account with this email address. Please log in instead, or use the 'Forgot Password' option if you need to reset your password.",
           action: "login"
@@ -173,20 +183,20 @@ export function setupAuth(app: Express) {
     console.log('Session ID:', req.sessionID);
     console.log('Is Authenticated:', req.isAuthenticated());
     console.log('User in session:', req.user);
-    
+
     // Check if user is authenticated
     if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ error: "Not authenticated" });
     }
-    
+
     try {
       const { password: _, ...userWithoutPassword } = req.user as any;
-      
+
       // Get user's companies and roles for enhanced dashboard display
       const companies = await storage.getCompaniesByUserId(req.user.id);
       let companyRole = 'USER'; // default role
       let primaryCompany = null;
-      
+
       if (companies && companies.length > 0) {
         // Get role for first/primary company
         primaryCompany = companies[0];
@@ -195,7 +205,7 @@ export function setupAuth(app: Express) {
           companyRole = role.toUpperCase(); // Ensure it's uppercase (ADMIN, USER, etc.)
         }
       }
-      
+
       // Return user data with company role information
       res.json({
         ...userWithoutPassword,
@@ -216,7 +226,7 @@ export function setupAuth(app: Express) {
       const { TwoFactorService } = await import("./twoFactor");
       const userId = req.user.id;
       const userEmail = req.user.email;
-      
+
       const setupData = await TwoFactorService.generateSetup(userId, userEmail);
       res.json(setupData);
     } catch (error) {
@@ -260,7 +270,7 @@ export function setupAuth(app: Express) {
       const { TwoFactorService } = await import("./twoFactor");
       const userId = req.user.id;
       await TwoFactorService.disableTwoFactor(userId);
-      
+
       const updatedUser = await storage.getUser(userId);
       res.json({ message: "2FA disabled successfully", user: updatedUser });
     } catch (error) {
@@ -274,7 +284,7 @@ export function setupAuth(app: Express) {
       const { TwoFactorService } = await import("./twoFactor");
       const userId = req.user.id;
       const userEmail = req.user.email;
-      
+
       await TwoFactorService.sendEmailCode(userId, userEmail);
       res.json({ message: "Email code sent successfully" });
     } catch (error) {
@@ -288,7 +298,7 @@ export function setupAuth(app: Express) {
       const { TwoFactorService } = await import("./twoFactor");
       const { email } = req.body;
       const user = await storage.getUserByEmail(email);
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -306,7 +316,7 @@ export function setupAuth(app: Express) {
       const { TwoFactorService } = await import("./twoFactor");
       const { email, type, code } = req.body;
       const user = await storage.getUserByEmail(email);
-      
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -352,17 +362,17 @@ export function requireAuth(req: any, res: any, next: any) {
   console.log('NODE_ENV:', process.env.NODE_ENV);
   console.log('Is Authenticated:', req.isAuthenticated());
   console.log('User in request:', !!req.user);
-  
+
   // Check normal authentication first
   if (req.isAuthenticated()) {
     console.log('requireAuth - User is authenticated, proceeding...');
     return next();
   }
-  
+
   // TEMPORARY: Allow all company registrations for live users
   // Auto-authenticate for both development and production to allow registrations
   console.log('requireAuth - Allowing all company registrations (temp fix for live users)');
-  
+
   // Use async/await pattern properly for middleware
   (async () => {
     try {
@@ -388,9 +398,9 @@ export function requireAuth(req: any, res: any, next: any) {
       res.status(401).json({ error: "Authentication failed" });
     }
   })();
-  
+
   return; // Important: prevent falling through
-  
+
   // Production: Return unauthorized
   console.log('requireAuth - Production mode - returning unauthorized');
   return res.status(401).json({ error: "Not authenticated" });

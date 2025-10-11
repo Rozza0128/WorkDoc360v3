@@ -1,0 +1,671 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { 
+  FileText, 
+  Download, 
+  Eye, 
+  Shield, 
+  AlertTriangle, 
+  Users,
+  Building,
+  Hammer
+} from "lucide-react";
+
+interface DocumentGeneratorProps {
+  companyId: number;
+  tradeType: string;
+}
+
+const documentGenerationSchema = z.object({
+  templateType: z.string().min(1, "Please select a document type"),
+  siteName: z.string().min(1, "Site name is required"),
+  siteAddress: z.string().min(1, "Site address is required"),
+  projectManager: z.string().min(1, "Project manager name is required"),
+  hazards: z.string().optional(),
+  controlMeasures: z.string().optional(),
+  specialRequirements: z.string().optional(),
+  // Custom trade fields
+  customTradeDescription: z.string().optional(),
+  customWorkActivities: z.string().optional(),
+  customEquipment: z.string().optional(),
+  customChallenges: z.string().optional(),
+});
+
+type DocumentGenerationData = z.infer<typeof documentGenerationSchema>;
+
+// Trade-specific document templates
+const documentTemplates = {
+  scaffolding: [
+    {
+      id: "scaffold-risk-assessment",
+      name: "Scaffold Risk Assessment",
+      description: "TG20/TG30:24 compliant risk assessment for scaffold erection",
+      icon: <Shield className="h-4 w-4" />,
+      category: "Risk Assessment"
+    },
+    {
+      id: "scaffold-method-statement",
+      name: "Scaffold Method Statement",
+      description: "CISRS approved method statement for scaffold installation",
+      icon: <FileText className="h-4 w-4" />,
+      category: "Method Statement"
+    },
+    {
+      id: "scaffold-inspection-checklist",
+      name: "Scaffold Inspection Checklist",
+      description: "Daily and weekly inspection records as per Work at Height Regulations",
+      icon: <Eye className="h-4 w-4" />,
+      category: "Inspection"
+    }
+  ],
+  plastering: [
+    {
+      id: "plastering-risk-assessment",
+      name: "Plastering Risk Assessment",
+      description: "CSCS 2025 compliant risk assessment for internal/external plastering",
+      icon: <Shield className="h-4 w-4" />,
+      category: "Risk Assessment"
+    },
+    {
+      id: "dust-control-method",
+      name: "Dust Control Method Statement",
+      description: "COSHH compliant dust control procedures for plastering work",
+      icon: <AlertTriangle className="h-4 w-4" />,
+      category: "Method Statement"
+    },
+    {
+      id: "material-safety-data",
+      name: "Material Safety Data Sheet",
+      description: "Safety information for plastering materials and additives",
+      icon: <FileText className="h-4 w-4" />,
+      category: "Safety Data"
+    }
+  ],
+  general_building: [
+    {
+      id: "construction-phase-plan",
+      name: "Construction Phase Plan",
+      description: "CDM 2015 compliant construction phase health and safety plan",
+      icon: <Building className="h-4 w-4" />,
+      category: "CDM Documents"
+    },
+    {
+      id: "general-risk-assessment",
+      name: "General Risk Assessment",
+      description: "Comprehensive risk assessment for general building activities",
+      icon: <Shield className="h-4 w-4" />,
+      category: "Risk Assessment"
+    },
+    {
+      id: "toolbox-talk-template",
+      name: "Toolbox Talk Template",
+      description: "HSE compliant daily safety briefing template",
+      icon: <Users className="h-4 w-4" />,
+      category: "Training"
+    },
+    {
+      id: "manual-handling-assessment",
+      name: "Manual Handling Assessment",
+      description: "Manual Handling Operations Regulations 1992 compliance",
+      icon: <Hammer className="h-4 w-4" />,
+      category: "Risk Assessment"
+    }
+  ],
+  custom: [
+    {
+      id: "custom-consultation",
+      name: "Bespoke Document Consultation",
+      description: "Our team will research and create custom documents for your specific trade",
+      icon: <Users className="h-4 w-4" />,
+      category: "Custom Service"
+    }
+  ]
+};
+
+export function DocumentGenerator({ companyId, tradeType }: DocumentGeneratorProps) {
+  const { toast } = useToast();
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+
+  const form = useForm<DocumentGenerationData>({
+    resolver: zodResolver(documentGenerationSchema),
+    defaultValues: {
+      templateType: "",
+      siteName: "",
+      siteAddress: "",
+      projectManager: "",
+      hazards: "",
+      controlMeasures: "",
+      specialRequirements: "",
+      customTradeDescription: "",
+      customWorkActivities: "",
+      customEquipment: "",
+      customChallenges: "",
+    },
+  });
+
+  // Get templates for the current trade type
+  const availableTemplates = documentTemplates[tradeType as keyof typeof documentTemplates] || documentTemplates.general_building;
+  
+  // Check if this is a custom/unlisted trade
+  const isCustomTrade = !Object.keys(documentTemplates).includes(tradeType) || tradeType === 'custom';
+
+  const generateDocument = useMutation({
+    mutationFn: async (data: DocumentGenerationData) => {
+      return await apiRequest(`/api/companies/${companyId}/documents/generate`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: (response) => {
+      toast({
+        title: "Document Generated Successfully",
+        description: "Your compliance document has been created and is ready for download.",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/companies/${companyId}/documents`] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Generation Failed",
+        description: "There was a problem generating your document. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (data: DocumentGenerationData) => {
+    generateDocument.mutate(data);
+  };
+
+  const getTemplateDetails = (templateId: string) => {
+    return availableTemplates.find(template => template.id === templateId);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-charcoal">Document Generator</h2>
+          <p className="text-steel-gray">
+            {isCustomTrade 
+              ? "Let us research and create bespoke documents for your specific trade"
+              : "Create ISO standards and H&S documents for your trade"
+            }
+          </p>
+        </div>
+        <Badge variant="secondary" className="capitalize">
+          {isCustomTrade ? "Custom Trade" : `${tradeType.replace('_', ' ')} Specialist`}
+        </Badge>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Template Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Templates</CardTitle>
+            <CardDescription>
+              Trade-specific document templates compliant with UK regulations
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {availableTemplates.map((template) => (
+                <div
+                  key={template.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                    selectedTemplate === template.id
+                      ? "border-construction-orange bg-construction-orange bg-opacity-5"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => {
+                    setSelectedTemplate(template.id);
+                    form.setValue("templateType", template.id);
+                  }}
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                      {template.icon}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-charcoal">{template.name}</h4>
+                        <Badge variant="outline" className="text-xs">
+                          {template.category}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-steel-gray mt-1">{template.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Document Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {isCustomTrade ? "Custom Trade Consultation" : "Document Details"}
+            </CardTitle>
+            <CardDescription>
+              {isCustomTrade 
+                ? "Tell us about your business so we can research the right documents for you"
+                : "Provide site-specific information for your document"
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                
+                {/* Custom Trade Research Form */}
+                {isCustomTrade && selectedTemplate === "custom-consultation" && (
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+                      <h4 className="font-medium text-blue-900 mb-2">Bespoke Document Research Service</h4>
+                      <p className="text-sm text-blue-700 mb-3">
+                        Our compliance team will research your specific trade requirements and create custom documents. 
+                        This service is charged at £150/hour with an estimated 2-4 hours for most trades.
+                      </p>
+                      <p className="text-xs text-blue-600">
+                        You'll receive a detailed quote before any work begins.
+                      </p>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="customTradeDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Describe Your Trade/Business</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="e.g. We specialise in heritage stone restoration and conservation work on listed buildings..."
+                              className="resize-none h-24"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Tell us exactly what your company does - be as specific as possible
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="customWorkActivities"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Main Work Activities</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="e.g. Lime pointing, stone carving, structural repairs, working at height, use of specialist cleaning equipment..."
+                              className="resize-none h-24"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            List the main activities your workers perform on site
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="customEquipment"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Equipment & Materials Used</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="e.g. MEWP, scaffolding, pneumatic tools, lime mortars, stone dust, cleaning chemicals..."
+                              className="resize-none h-20"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            List equipment, tools, and materials your team uses
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="customChallenges"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Specific Safety Challenges</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="e.g. Working on unstable historic structures, dust control in occupied buildings, working around the public..."
+                              className="resize-none h-20"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Any particular safety challenges or risks specific to your work
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {/* Standard Document Generation Form */}
+                {(!isCustomTrade || selectedTemplate !== "custom-consultation") && (
+                  <div className="space-y-4">
+                    <FormField
+                  control={form.control}
+                  name="templateType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Document Type</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedTemplate(value);
+                        }} 
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select document type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {availableTemplates.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="siteName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Site Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Residential Development Phase 2" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="siteAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Site Address</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Full site address including postcode"
+                          className="resize-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="projectManager"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Manager</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name of responsible person" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {selectedTemplate && (
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="hazards"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Specific Hazards</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="List any site-specific hazards or risks"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Identify hazards specific to your site conditions
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="controlMeasures"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Control Measures</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Describe control measures and safety procedures"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Specify how identified risks will be controlled
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="specialRequirements"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Special Requirements</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Any special client or site requirements"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+
+                <div className="flex space-x-3 pt-4">
+                  <Button 
+                    type="submit" 
+                    disabled={generateDocument.isPending || !selectedTemplate}
+                    className="flex-1"
+                  >
+                    {generateDocument.isPending ? (
+                      isCustomTrade ? "Submitting Request..." : "Generating..."
+                    ) : (
+                      <>
+                        {isCustomTrade && selectedTemplate === "custom-consultation" ? (
+                          <>
+                            <Users className="mr-2 h-4 w-4" />
+                            Submit Research Request
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="mr-2 h-4 w-4" />
+                            Generate Document
+                          </>
+                        )}
+                      </>
+                    )}
+                  </Button>
+                  
+                  {selectedTemplate && !isCustomTrade && (
+                    <Button type="button" variant="outline">
+                      <Eye className="mr-2 h-4 w-4" />
+                      Preview
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Template Information */}
+      {selectedTemplate && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              {getTemplateDetails(selectedTemplate)?.icon}
+              <span>{getTemplateDetails(selectedTemplate)?.name}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {selectedTemplate === "custom-consultation" ? (
+              <div className="space-y-4">
+                <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                  <h4 className="font-medium text-amber-900 mb-2">What Happens Next?</h4>
+                  <ol className="text-sm text-amber-700 space-y-2">
+                    <li>1. Our compliance team will review your business description within 24 hours</li>
+                    <li>2. We'll research UK regulations specific to your trade</li>
+                    <li>3. You'll receive a detailed quote and document recommendations</li>
+                    <li>4. Upon approval, we'll create bespoke templates for your business</li>
+                    <li>5. All documents will be UK compliant and include your company branding</li>
+                  </ol>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <h4 className="font-medium text-charcoal mb-2">Service Includes</h4>
+                    <ul className="space-y-1 text-steel-gray">
+                      <li>• Industry-specific regulation research</li>
+                      <li>• Bespoke risk assessment templates</li>
+                      <li>• Method statement creation</li>
+                      <li>• Ongoing template updates</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-charcoal mb-2">Typical Timeline</h4>
+                    <ul className="space-y-1 text-steel-gray">
+                      <li>• Initial review: 24 hours</li>
+                      <li>• Research phase: 2-3 days</li>
+                      <li>• Document creation: 3-5 days</li>
+                      <li>• Revisions: 1-2 days</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <h4 className="font-medium text-charcoal mb-2">Compliance Standards</h4>
+                  <ul className="space-y-1 text-steel-gray">
+                    {tradeType === 'scaffolding' && (
+                      <>
+                        <li>• TG20/TG30:24 Guidelines</li>
+                        <li>• Work at Height Regulations 2005</li>
+                        <li>• CISRS Best Practice</li>
+                      </>
+                    )}
+                    {tradeType === 'plastering' && (
+                      <>
+                        <li>• COSHH Regulations 2002</li>
+                        <li>• CSCS 2025 Requirements</li>
+                        <li>• Construction Skills Certification</li>
+                      </>
+                    )}
+                    {(tradeType === 'general_building' || isCustomTrade) && (
+                      <>
+                        <li>• CDM Regulations 2015</li>
+                        <li>• Health & Safety at Work Act 1974</li>
+                        <li>• Manual Handling Operations Regulations</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium text-charcoal mb-2">Document Includes</h4>
+                  <ul className="space-y-1 text-steel-gray">
+                    <li>• Risk assessment matrix</li>
+                    <li>• Control measures hierarchy</li>
+                    <li>• Emergency procedures</li>
+                    <li>• Inspection schedules</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium text-charcoal mb-2">Delivery Format</h4>
+                  <ul className="space-y-1 text-steel-gray">
+                    <li>• PDF for printing</li>
+                    <li>• Editable Word document</li>
+                    <li>• Digital signature ready</li>
+                    <li>• Company branding included</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

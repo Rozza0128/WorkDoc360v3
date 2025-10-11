@@ -1,0 +1,208 @@
+Recommended steps to complete zone set-up
+Hide
+Add an A, AAAA, or CNAME record for www so that www.workdoc360.com will resolve.
+
+Add an A, AAAA, or CNAME record for your root domain so that workdoc360.com will resolve.
+
+Add an MX record for your root domain so that mail can reach @workdoc360.com addresses or set up restrictive SPF, DKIM, and DMARC records to prevent email spoofing.
+DNS management for workdoc360.com
+Review, add, and edit DNS records. Edits will go into effect once saved.
+DNS Setup:Full
+
+
+Import and Export
+
+
+Dashboard Display Settings
+Search DNS Records
+Your search yielded 18 results
+
+Type
+
+Name
+
+Content
+
+Proxy status
+
+TTL
+
+Actions
+
+
+CNAME
+autodiscover
+autodiscover.outlook.com
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+CNAME
+_domainconnect
+_domainconnect.gd.domaincontrol.com
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+CNAME
+email
+email.secureserver.net
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+CNAME
+lyncdiscover
+webdir.online.lync.com
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+CNAME
+msoid
+clientconfig.microsoftonline-p.net
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+CNAME
+s1._domainkey
+s1.domainkey.u54302925.wl176.sendgrid.net
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+CNAME
+s2._domainkey
+s2.domainkey.u54302925.wl176.sendgrid.net
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+CNAME
+sip
+sipdir.online.lync.com
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+
+
+CNAME
+workdoc360.com
+safe-work-guide-paulroscoe14.replit.app
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+CNAME
+www
+cname.replit.app
+
+Proxied
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+MX
+workdoc360.com
+workdoc360-com.mail.protection.outlook.com
+0
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+NS
+workdoc360.com
+ns12.domaincontrol.com
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+NS
+workdoc360.com
+ns11.domaincontrol.com
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+SRV
+_sipfederationtls._tcp
+100 1 5061 sipfed.online.lync.com
+
+100
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+SRV
+_sip._tls
+100 1 443 sipdir.online.lync.com
+
+100
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+TXT
+_dmarc
+"v=DMARC1; p=reject; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;"
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+TXT
+workdoc360.com
+"v=spf1 include:secureserver.net -all"
+DNS only
+
+Auto
+EditWhen toggled open, an additional table row will be added below this row to enable editing DNS records.
+
+
+TXT
+workdoc360.com
+"NETORGFT19189653.onmicrosoft.com"
+DNS only
+
+Auto

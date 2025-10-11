@@ -20,21 +20,21 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
+
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
+
   // X-Content-Type-Options: Prevent MIME type sniffing
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  
+
   // Referrer-Policy: Control referrer information
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+
   // Content-Security-Policy: Prevent XSS attacks (relaxed for development)
   if (process.env.NODE_ENV === 'production') {
-    res.setHeader('Content-Security-Policy', 
+    res.setHeader('Content-Security-Policy',
       "default-src 'self'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://challenges.cloudflare.com; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
@@ -45,17 +45,17 @@ app.use((req, res, next) => {
       "object-src 'none'; " +
       "base-uri 'self';"
     );
-    
+
     // X-Frame-Options: Prevent clickjacking
     res.setHeader('X-Frame-Options', 'DENY');
-    
+
     // Strict-Transport-Security: Force HTTPS (only in production)
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
-  
+
   // X-XSS-Protection: Enable XSS filtering
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  
+
   next();
 });
 
@@ -112,15 +112,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  // Bind to the port provided by the environment (Beanstalk/nginx sets PORT).
+  // Fall back to 8081 when PORT isn't set (matches Elastic Beanstalk expectation).
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8081;
+  server.listen(PORT, "0.0.0.0", () => {
+    log(`serving on port ${PORT}`);
   });
 })();
